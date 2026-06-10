@@ -77,20 +77,16 @@ export default async function NewsPage() {
                     {a.source}
                   </span>
                   <span className="text-[12px] text-ink-3">
-                    {a.date.toLocaleString("de-CH", {
+                    {a.date.toLocaleDateString("de-CH", {
                       day: "numeric",
                       month: "short",
-                      hour: "2-digit",
-                      minute: "2-digit",
                       timeZone: "Europe/Zurich",
                     })}
                   </span>
                 </div>
-                <h3 className="text-[16px] font-bold leading-snug">
-                  {a.title} <span className="font-normal text-ink-3">↗</span>
-                </h3>
+                <h3 className="text-[17px] font-bold leading-snug">{a.title}</h3>
                 {a.summary && (
-                  <p className="mt-1 line-clamp-3 text-[14px] leading-relaxed text-ink-2">
+                  <p className="mt-1.5 text-[14px] leading-relaxed text-ink-2">
                     {a.summary}
                   </p>
                 )}
