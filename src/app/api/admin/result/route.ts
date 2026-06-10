@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { calcPoints } from "@/lib/scoring";
+import { LEADERBOARD_TAG } from "@/lib/leaderboard";
 
 // Resultat erfassen und alle Tipps zu diesem Spiel neu bewerten
 export async function POST(req: Request) {
@@ -29,6 +31,7 @@ export async function POST(req: Request) {
       data: { homeScore: null, awayScore: null, status: "SCHEDULED" },
     });
     await prisma.tip.updateMany({ where: { matchId: match.id }, data: { points: null } });
+    revalidateTag(LEADERBOARD_TAG, "max");
     return NextResponse.json({ ok: true });
   }
 
@@ -53,5 +56,6 @@ export async function POST(req: Request) {
     )
   );
 
+  revalidateTag(LEADERBOARD_TAG, "max");
   return NextResponse.json({ ok: true, scored: tips.length });
 }

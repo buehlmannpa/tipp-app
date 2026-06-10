@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRef, useState } from "react";
 
 export type TipCardMatch = {
@@ -46,19 +47,20 @@ export default function TipCard({ match }: { match: TipCardMatch }) {
 
   const finished = match.homeScore !== null;
 
-  return (
-    <div className="card p-4">
+  const inner = (
+    <>
       <div className="mb-3 flex items-center justify-between text-[12px] text-ink-2">
         <span className="rounded-full bg-tint-soft px-2 py-0.5 font-semibold text-tint">
           {match.badge}
         </span>
         <span>
           {match.time} · {match.city}
+          {match.locked && <span className="ml-1 text-ink-2">›</span>}
         </span>
       </div>
 
       <div className="flex items-center gap-2">
-        <TeamSide flag={match.homeFlag} name={match.homeName} align="left" />
+        <TeamSide flag={match.homeFlag} name={match.homeName} />
 
         {match.locked ? (
           <div className="flex min-w-[84px] flex-col items-center">
@@ -76,20 +78,21 @@ export default function TipCard({ match }: { match: TipCardMatch }) {
                   match.points >= 3
                     ? "bg-green/15 text-green"
                     : match.points > 0
-                      ? "bg-orange/15 text-orange"
-                      : "bg-card-2 text-ink-3"
+                      ? "bg-orange/15 text-orange-deep"
+                      : "bg-card-2 text-ink-2"
                 }`}
               >
                 +{match.points} P.
               </span>
             )}
             {!finished && match.tipHome === null && (
-              <span className="text-[11px] text-ink-3">kein Tipp</span>
+              <span className="text-[11px] text-ink-2">kein Tipp</span>
             )}
           </div>
         ) : (
           <div className="flex items-center gap-1.5">
             <ScoreInput
+              label={`Tore ${match.homeName}`}
               value={home}
               onChange={(v) => {
                 setHome(v);
@@ -98,6 +101,7 @@ export default function TipCard({ match }: { match: TipCardMatch }) {
             />
             <span className="text-[18px] font-semibold text-ink-3">:</span>
             <ScoreInput
+              label={`Tore ${match.awayName}`}
               value={away}
               onChange={(v) => {
                 setAway(v);
@@ -107,12 +111,12 @@ export default function TipCard({ match }: { match: TipCardMatch }) {
           </div>
         )}
 
-        <TeamSide flag={match.awayFlag} name={match.awayName} align="right" />
+        <TeamSide flag={match.awayFlag} name={match.awayName} />
       </div>
 
-      {!match.locked && (
-        <div className="mt-2 h-4 text-center text-[11px]">
-          {state === "saving" && <span className="text-ink-3">Speichern …</span>}
+      {!match.locked && state !== "idle" && (
+        <div className="mt-2 text-center text-[11px]" role="status">
+          {state === "saving" && <span className="text-ink-2">Speichern …</span>}
           {state === "saved" && (
             <span className="animate-pop font-semibold text-green">✓ Tipp gespeichert</span>
           )}
@@ -121,26 +125,26 @@ export default function TipCard({ match }: { match: TipCardMatch }) {
           )}
         </div>
       )}
-    </div>
+    </>
   );
+
+  // Gesperrte Spiele führen zum Tippvergleich der Gruppe
+  if (match.locked) {
+    return (
+      <Link href={`/spiel/${match.id}`} className="card block p-4 active:bg-card-2">
+        {inner}
+      </Link>
+    );
+  }
+  return <div className="card p-4">{inner}</div>;
 }
 
-function TeamSide({
-  flag,
-  name,
-  align,
-}: {
-  flag: string;
-  name: string;
-  align: "left" | "right";
-}) {
+function TeamSide({ flag, name }: { flag: string; name: string }) {
   return (
-    <div
-      className={`flex flex-1 flex-col items-center gap-1 ${
-        align === "left" ? "" : ""
-      }`}
-    >
-      <span className="text-[34px] leading-none">{flag}</span>
+    <div className="flex flex-1 flex-col items-center gap-1">
+      <span className="text-[34px] leading-none" aria-hidden>
+        {flag}
+      </span>
       <span className="text-center text-[13px] font-semibold leading-tight">
         {name}
       </span>
@@ -149,9 +153,11 @@ function TeamSide({
 }
 
 function ScoreInput({
+  label,
   value,
   onChange,
 }: {
+  label: string;
   value: string;
   onChange: (v: string) => void;
 }) {
@@ -161,6 +167,7 @@ function ScoreInput({
       inputMode="numeric"
       min={0}
       max={20}
+      aria-label={label}
       value={value}
       placeholder="–"
       onChange={(e) => {

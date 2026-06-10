@@ -1,5 +1,5 @@
 import { prisma } from "./db";
-import { fmtDay, STAGE_LABELS } from "./format";
+import { fmtDay, STAGE_LABELS, weekOf } from "./format";
 
 export type NewsItem = {
   id: string;
@@ -7,6 +7,7 @@ export type NewsItem = {
   title: string;
   body: string;
   tag: string;
+  href?: string;
 };
 
 type FinishedMatch = {
@@ -86,6 +87,7 @@ export async function generateNews(): Promise<NewsItem[]> {
         id: `preview-${m.id}`,
         date: m.kickoff,
         tag: "Vorschau",
+        href: `/tipps?woche=${weekOf(m.kickoff)}`,
         title: `${m.homeTeam!.flag} ${m.homeTeam!.name} trifft auf ${m.awayTeam!.flag} ${m.awayTeam!.name}`,
         body: `${STAGE_LABELS[m.stage]}${
           m.stage === "GROUP" ? ` (Gruppe ${m.groupLetter})` : ""

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { maybeSyncResults } from "@/lib/resultSync";
 import {
   fmtDay,
   fmtTime,
@@ -8,11 +9,14 @@ import {
   weekOf,
   weekRangeLabel,
 } from "@/lib/format";
+import Header from "@/components/Header";
 import TipCard, { type TipCardMatch } from "@/components/TipCard";
 
 export const dynamic = "force-dynamic";
 
 const WEEKS = [1, 2, 3, 4, 5, 6];
+const WEEK_START = Date.UTC(2026, 5, 11);
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 export default async function TippsPage({
   searchParams,
@@ -20,12 +24,21 @@ export default async function TippsPage({
   searchParams: Promise<{ woche?: string }>;
 }) {
   const session = await requireSession();
+  await maybeSyncResults();
   const params = await searchParams;
   const now = new Date();
-  const currentWeek = weekOf(now) >= 1 && now.getTime() >= Date.UTC(2026, 5, 11) ? weekOf(now) : 1;
+  const currentWeek =
+    now.getTime() >= WEEK_START ? weekOf(now) : 1;
   const week = Math.min(6, Math.max(1, Number(params.woche) || currentWeek));
 
-  const matches = await prisma.match.findMany({
+  // Nur die Spiele der gewählten Woche laden
+  const weekMatches = await prisma.match.findMany({
+    where: {
+      kickoff: {
+        gte: new Date(WEEK_START + (week - 1) * WEEK_MS),
+        lt: week === 6 ? undefined : new Date(WEEK_START + week * WEEK_MS),
+      },
+    },
     include: {
       homeTeam: true,
       awayTeam: true,
@@ -33,8 +46,6 @@ export default async function TippsPage({
     },
     orderBy: { kickoff: "asc" },
   });
-
-  const weekMatches = matches.filter((m) => weekOf(m.kickoff) === week);
 
   // Nach Tag gruppieren
   const byDay = new Map<string, typeof weekMatches>();
@@ -52,25 +63,21 @@ export default async function TippsPage({
       m.tips.length === 0
   ).length;
 
+  // In der laufenden Woche direkt zum heutigen Tag springen
+  const todayLabel = week === currentWeek ? fmtDay(now) : null;
+
   return (
     <main>
-      <header className="px-5 pt-[max(env(safe-area-inset-top),20px)] pb-2">
-        <p className="text-[13px] font-medium uppercase tracking-wide text-ink-2">
-          Woche {week} · {weekRangeLabel(week)}
-        </p>
-        <h1 className="text-[32px] font-bold tracking-tight">Tipps</h1>
-      </header>
+      <Header title="Tipps" subtitle={`Woche ${week} · ${weekRangeLabel(week)}`} />
 
       {/* Wochen-Auswahl */}
-      <div className="no-scrollbar mb-4 flex gap-2 overflow-x-auto px-4 pb-1">
+      <div className="no-scrollbar mb-3 flex gap-2 overflow-x-auto px-4 pb-1">
         {WEEKS.map((w) => (
           <Link
             key={w}
             href={`/tipps?woche=${w}`}
-            className={`shrink-0 rounded-full px-4 py-2 text-[14px] font-semibold transition-colors ${
-              w === week
-                ? "bg-tint text-white"
-                : "card text-ink-2"
+            className={`shrink-0 rounded-full px-4 py-2.5 text-[14px] font-semibold transition-colors ${
+              w === week ? "bg-tint text-white" : "card text-ink-2"
             }`}
           >
             Woche {w}
@@ -79,10 +86,12 @@ export default async function TippsPage({
       </div>
 
       {openCount > 0 && (
-        <p className="mb-3 px-5 text-[13px] font-medium text-orange">
-          Noch {openCount} {openCount === 1 ? "offener Tipp" : "offene Tipps"} in
-          dieser Woche
-        </p>
+        <div className="mb-3 px-4">
+          <span className="inline-block rounded-full bg-orange/15 px-3 py-1.5 text-[13px] font-bold text-orange-deep">
+            Noch {openCount} {openCount === 1 ? "offener Tipp" : "offene Tipps"} in
+            dieser Woche
+          </span>
+        </div>
       )}
 
       <div className="space-y-5 px-4">
@@ -92,8 +101,15 @@ export default async function TippsPage({
           </div>
         )}
         {[...byDay.entries()].map(([day, dayMatches]) => (
-          <section key={day}>
-            <h2 className="mb-2 px-1 text-[16px] font-bold">{day}</h2>
+          <section key={day} id={day === todayLabel ? "heute" : undefined}>
+            <h2 className="mb-2 px-1 text-[16px] font-bold">
+              {day}
+              {day === todayLabel && (
+                <span className="ml-2 rounded-full bg-tint-soft px-2 py-0.5 text-[11px] font-bold text-tint">
+                  Heute
+                </span>
+              )}
+            </h2>
             <div className="space-y-3">
               {dayMatches.map((m) => {
                 if (!m.homeTeam || !m.awayTeam) {
@@ -107,7 +123,7 @@ export default async function TippsPage({
                           {fmtTime(m.kickoff)} · {m.city}
                         </span>
                       </div>
-                      <p className="py-2 text-center text-[14px] font-medium text-ink-3">
+                      <p className="py-2 text-center text-[14px] font-medium text-ink-2">
                         {m.homePlaceholder || "Paarung"} – Teams werden nach der
                         Gruppenphase ermittelt
                       </p>
@@ -141,6 +157,21 @@ export default async function TippsPage({
           </section>
         ))}
       </div>
+
+      {todayLabel && byDay.has(todayLabel) && (
+        <ScrollToToday />
+      )}
     </main>
+  );
+}
+
+// Springt beim Laden der aktuellen Woche zum heutigen Tag
+function ScrollToToday() {
+  return (
+    <script
+      dangerouslySetInnerHTML={{
+        __html: `(function(){var el=document.getElementById('heute');if(el&&!location.hash&&el.getBoundingClientRect().top>window.innerHeight*0.7){el.scrollIntoView({block:'start'});window.scrollBy(0,-12);}})();`,
+      }}
+    />
   );
 }

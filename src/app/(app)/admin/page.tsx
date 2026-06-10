@@ -3,7 +3,9 @@ import { redirect } from "next/navigation";
 import { requireSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { fmtShort, fmtTime, STAGE_LABELS } from "@/lib/format";
+import Header from "@/components/Header";
 import AdminMatchRow, { type AdminMatch } from "@/components/AdminMatchRow";
+import AdminUserRow from "@/components/AdminUserRow";
 
 export const dynamic = "force-dynamic";
 
@@ -24,30 +26,37 @@ export default async function AdminPage({
         ? { stage: { not: "GROUP" as const } }
         : { kickoff: { lte: now }, status: { not: "FINISHED" as const } };
 
-  const [matches, teams] = await Promise.all([
-    prisma.match.findMany({
-      where,
-      include: { homeTeam: true, awayTeam: true },
-      orderBy: { kickoff: "asc" },
-      take: 80,
-    }),
-    prisma.team.findMany({ orderBy: { name: "asc" } }),
-  ]);
+  const [matches, teams] =
+    filter === "benutzer"
+      ? [[], []]
+      : await Promise.all([
+          prisma.match.findMany({
+            where,
+            include: { homeTeam: true, awayTeam: true },
+            orderBy: { kickoff: "asc" },
+            take: 80,
+          }),
+          prisma.team.findMany({ orderBy: { name: "asc" } }),
+        ]);
 
   const filters = [
     { key: "faellig", label: "Fällig" },
     { key: "ko", label: "K.o.-Spiele" },
     { key: "alle", label: "Alle" },
+    { key: "benutzer", label: "Benutzer" },
   ];
+
+  const users =
+    filter === "benutzer"
+      ? await prisma.user.findMany({
+          select: { id: true, username: true, email: true },
+          orderBy: { username: "asc" },
+        })
+      : [];
 
   return (
     <main>
-      <header className="px-5 pt-[max(env(safe-area-inset-top),20px)] pb-2">
-        <p className="text-[13px] font-medium uppercase tracking-wide text-ink-2">
-          Resultate erfassen & Paarungen setzen
-        </p>
-        <h1 className="text-[32px] font-bold tracking-tight">Verwaltung</h1>
-      </header>
+      <Header title="Verwaltung" subtitle="Resultate erfassen & Paarungen setzen" />
 
       <div className="no-scrollbar mb-4 flex gap-2 overflow-x-auto px-4 pb-1">
         {filters.map((f) => (
@@ -63,8 +72,27 @@ export default async function AdminPage({
         ))}
       </div>
 
+      {filter === "benutzer" && (
+        <div className="px-4">
+          <div className="card divide-y divide-sep overflow-hidden">
+            {users.map((u) => (
+              <AdminUserRow
+                key={u.id}
+                userId={u.id}
+                username={u.username}
+                email={u.email}
+              />
+            ))}
+          </div>
+          <p className="px-2 pt-3 text-center text-[12px] text-ink-2">
+            Passwort-Reset erzeugt ein temporäres Passwort, das du der Person
+            sicher weitergibst.
+          </p>
+        </div>
+      )}
+
       <div className="space-y-3 px-4">
-        {matches.length === 0 && (
+        {filter !== "benutzer" && matches.length === 0 && (
           <div className="card p-8 text-center text-[14px] text-ink-2">
             Nichts zu erfassen – alles aktuell. 👍
           </div>

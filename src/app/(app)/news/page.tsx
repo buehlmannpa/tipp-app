@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { requireSession } from "@/lib/auth";
 import { generateNews } from "@/lib/news";
 import { fetchFeedArticles } from "@/lib/feeds";
@@ -26,32 +27,50 @@ export default async function NewsPage() {
             Zusammenfassungen.
           </div>
         )}
-        {items.map((item) => (
-          <article key={item.id} className="card p-4">
-            <div className="mb-2 flex items-center justify-between">
-              <span
-                className={`rounded-full px-2 py-0.5 text-[12px] font-semibold ${
-                  item.tag === "Vorschau"
-                    ? "bg-orange/15 text-orange"
-                    : "bg-tint-soft text-tint"
-                }`}
-              >
-                {item.tag}
-              </span>
-              <span className="text-[12px] text-ink-3">
-                {item.date.toLocaleDateString("de-CH", {
-                  day: "numeric",
-                  month: "short",
-                  timeZone: "Europe/Zurich",
-                })}
-              </span>
-            </div>
-            <h2 className="text-[17px] font-bold leading-snug">{item.title}</h2>
-            <p className="mt-1.5 text-[14px] leading-relaxed text-ink-2">
-              {item.body}
-            </p>
-          </article>
-        ))}
+        {items.map((item) => {
+          const inner = (
+            <>
+              <div className="mb-2 flex items-center justify-between">
+                <span
+                  className={`rounded-full px-2 py-0.5 text-[12px] font-semibold ${
+                    item.tag === "Vorschau"
+                      ? "bg-orange/15 text-orange-deep"
+                      : "bg-tint-soft text-tint"
+                  }`}
+                >
+                  {item.tag}
+                </span>
+                <span className="text-[12px] text-ink-2">
+                  {item.date.toLocaleDateString("de-CH", {
+                    day: "numeric",
+                    month: "short",
+                    timeZone: "Europe/Zurich",
+                  })}
+                </span>
+              </div>
+              <h2 className="text-[17px] font-bold leading-snug">{item.title}</h2>
+              <p className="mt-1.5 text-[14px] leading-relaxed text-ink-2">
+                {item.body}
+                {item.href && (
+                  <span className="ml-1 font-semibold text-tint">Zum Tippen ›</span>
+                )}
+              </p>
+            </>
+          );
+          return item.href ? (
+            <Link
+              key={item.id}
+              href={item.href}
+              className="card block p-4 active:bg-card-2"
+            >
+              {inner}
+            </Link>
+          ) : (
+            <article key={item.id} className="card p-4">
+              {inner}
+            </article>
+          );
+        })}
 
         {/* Externe Feeds streamen nach – blockieren das Seitenladen nicht */}
         <Suspense fallback={<FeedSkeleton />}>
@@ -87,7 +106,7 @@ async function FeedSection() {
             >
               {a.source}
             </span>
-            <span className="text-[12px] text-ink-3">
+            <span className="text-[12px] text-ink-2">
               {a.date.toLocaleDateString("de-CH", {
                 day: "numeric",
                 month: "short",
@@ -95,15 +114,28 @@ async function FeedSection() {
               })}
             </span>
           </div>
-          <h3 className="text-[17px] font-bold leading-snug">{a.title}</h3>
-          {a.summary && (
-            <p className="mt-1.5 text-[14px] leading-relaxed text-ink-2">
-              {a.summary}
-            </p>
-          )}
+          <div className="flex gap-3">
+            <div className="min-w-0 flex-1">
+              <h3 className="text-[17px] font-bold leading-snug">{a.title}</h3>
+              {a.summary && (
+                <p className="mt-1.5 text-[14px] leading-relaxed text-ink-2">
+                  {a.summary}
+                </p>
+              )}
+            </div>
+            {a.image && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={a.image}
+                alt=""
+                loading="lazy"
+                className="mt-0.5 h-20 w-20 shrink-0 rounded-xl object-cover"
+              />
+            )}
+          </div>
         </a>
       ))}
-      <p className="px-2 pb-1 text-center text-[12px] text-ink-3">
+      <p className="px-2 pb-1 text-center text-[12px] text-ink-2">
         Artikel von kicker und Sportschau · öffnen sich im Browser
       </p>
     </>

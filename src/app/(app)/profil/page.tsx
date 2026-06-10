@@ -3,7 +3,11 @@ import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { leaderboard } from "@/lib/leaderboard";
 import Header from "@/components/Header";
+import Avatar from "@/components/Avatar";
 import LogoutButton from "@/components/LogoutButton";
+import ChangePassword from "@/components/ChangePassword";
+import PushToggle from "@/components/PushToggle";
+import InstallHint from "@/components/InstallHint";
 
 export const dynamic = "force-dynamic";
 
@@ -21,14 +25,12 @@ export default async function ProfilPage() {
 
       <div className="space-y-4 px-4">
         <div className="card flex items-center gap-4 p-4">
-          <span className="flex h-16 w-16 items-center justify-center rounded-full bg-tint/85 text-[26px] font-bold text-white">
-            {user.username.slice(0, 1).toUpperCase()}
-          </span>
+          <Avatar name={user.username} size={64} />
           <div>
             <p className="text-[19px] font-bold">{user.username}</p>
             <p className="text-[14px] text-ink-2">{user.email}</p>
             {user.isAdmin && (
-              <span className="mt-1 inline-block rounded-full bg-gold/15 px-2 py-0.5 text-[12px] font-bold text-gold">
+              <span className="mt-1 inline-block rounded-full bg-gold/15 px-2 py-0.5 text-[12px] font-bold text-orange-deep">
                 Admin
               </span>
             )}
@@ -43,30 +45,26 @@ export default async function ProfilPage() {
           <Row label="Gruppen" value={`${groupCount}`} />
         </div>
 
+        <PushToggle />
+
         {user.isAdmin && (
           <Link
             href="/admin"
             className="card flex items-center justify-between p-4 active:bg-card-2"
           >
             <div>
-              <p className="text-[16px] font-semibold">Resultate verwalten</p>
+              <p className="text-[16px] font-semibold">⚙️ Verwaltung</p>
               <p className="text-[13px] text-ink-2">
-                Spielausgänge erfassen und K.o.-Paarungen setzen
+                Resultate, K.o.-Paarungen und Benutzer verwalten
               </p>
             </div>
-            <span className="text-ink-3">›</span>
+            <span className="text-ink-2">›</span>
           </Link>
         )}
 
-        <div className="card p-4">
-          <p className="text-[15px] font-semibold">📲 Als App installieren</p>
-          <p className="mt-1 text-[13px] leading-relaxed text-ink-2">
-            Öffne diese Seite in Safari, tippe auf{" "}
-            <span className="font-semibold">Teilen</span> und wähle{" "}
-            <span className="font-semibold">«Zum Home-Bildschirm»</span>. Die App
-            erscheint dann wie eine native App auf deinem iPhone.
-          </p>
-        </div>
+        <ChangePassword />
+
+        <InstallHint />
 
         <LogoutButton />
       </div>

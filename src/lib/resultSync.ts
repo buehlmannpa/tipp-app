@@ -1,6 +1,8 @@
 import type { Match, Stage } from "@prisma/client";
+import { revalidateTag } from "next/cache";
 import { prisma } from "./db";
 import { calcPoints } from "./scoring";
+import { LEADERBOARD_TAG } from "./leaderboard";
 
 // Automatischer Resultat-Sync via football-data.org (gratis, WM im Free-Tier).
 // Läuft "lazy" bei App-Aufrufen, sobald ein Spiel fertig sein müsste, sowie als
@@ -63,9 +65,14 @@ async function rescoreMatch(matchId: number, home: number, away: number) {
  * ein angepfiffenes Spiel ohne Endstand oder eine offene K.o.-Paarung in den
  * nächsten Tagen. Sonst kostet der Aufruf nur einen Count-Query.
  */
+// Pro warmer Serverless-Instanz höchstens alle 60 s prüfen
+let lastCheck = 0;
+
 export async function maybeSyncResults(): Promise<void> {
   if (!process.env.FOOTBALL_DATA_API_KEY) return;
   const now = Date.now();
+  if (now - lastCheck < 60 * 1000) return;
+  lastCheck = now;
   const due = await prisma.match.count({
     where: {
       OR: [
@@ -201,6 +208,9 @@ export async function syncResults(): Promise<{ updated: number }> {
     }
   }
 
-  if (updated > 0) console.log(`Resultat-Sync: ${updated} Spiele aktualisiert.`);
+  if (updated > 0) {
+    revalidateTag(LEADERBOARD_TAG, "max");
+    console.log(`Resultat-Sync: ${updated} Spiele aktualisiert.`);
+  }
   return { updated };
 }

@@ -7,6 +7,7 @@ export type FeedArticle = {
   title: string;
   summary: string;
   url: string;
+  image: string | null;
   date: Date;
 };
 
@@ -25,6 +26,14 @@ const WM_PATTERN = /\bWM\b|Weltmeisterschaft|World Cup|Nationalmannschaft|Nati\b
 function tag(block: string, name: string): string {
   const m = block.match(new RegExp(`<${name}[^>]*>([\\s\\S]*?)</${name}>`));
   return m ? m[1].trim() : "";
+}
+
+// Artikelbild aus media:content, media:thumbnail oder enclosure
+function imageOf(block: string): string | null {
+  const m = block.match(
+    /<(?:media:content|media:thumbnail|enclosure)[^>]*url="([^"]+\.(?:jpe?g|png|webp)[^"]*)"/i
+  );
+  return m ? m[1] : null;
 }
 
 function clean(text: string): string {
@@ -65,6 +74,7 @@ async function loadFeed(feed: (typeof FEEDS)[number]): Promise<FeedArticle[]> {
       title,
       summary,
       url: link,
+      image: imageOf(item),
       date: pubDate,
     });
   }

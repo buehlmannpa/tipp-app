@@ -2,12 +2,15 @@ import Link from "next/link";
 import { requireSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { leaderboard } from "@/lib/leaderboard";
+import { maybeSyncResults } from "@/lib/resultSync";
 import { fmtShort, fmtTime } from "@/lib/format";
+import Avatar from "@/components/Avatar";
 
 export const dynamic = "force-dynamic";
 
 export default async function Dashboard() {
   const session = await requireSession();
+  await maybeSyncResults();
   const now = new Date();
 
   const [entries, nextMatches, lastResults, myTipCount, openThisWeek] =
@@ -58,12 +61,8 @@ export default async function Dashboard() {
             Hoi {session.username} 👋
           </h1>
         </div>
-        <Link
-          href="/profil"
-          aria-label="Profil"
-          className="mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-tint/85 text-[16px] font-bold text-white"
-        >
-          {session.username.slice(0, 1).toUpperCase()}
+        <Link href="/profil" aria-label="Profil öffnen" className="mb-1">
+          <Avatar name={session.username} size={40} />
         </Link>
       </header>
 
@@ -113,12 +112,15 @@ export default async function Dashboard() {
                 </div>
                 {m.tips.length > 0 ? (
                   <span className="rounded-full bg-green/15 px-2 py-0.5 text-[12px] font-bold text-green">
-                    {m.tips[0].homeGoals}:{m.tips[0].awayGoals}
+                    Tipp {m.tips[0].homeGoals}:{m.tips[0].awayGoals}
                   </span>
                 ) : (
-                  <span className="rounded-full bg-orange/15 px-2 py-0.5 text-[12px] font-bold text-orange">
+                  <Link
+                    href="/tipps"
+                    className="rounded-full bg-orange/15 px-2 py-0.5 text-[12px] font-bold text-orange-deep"
+                  >
                     offen
-                  </span>
+                  </Link>
                 )}
               </div>
             ))}
@@ -177,7 +179,7 @@ export default async function Dashboard() {
           </div>
         </section>
 
-        <p className="pb-2 pt-1 text-center text-[12px] text-ink-3">
+        <p className="pb-2 pt-1 text-center text-[12px] text-ink-2">
           {myTipCount} Tipps abgegeben · Punktesystem: 3 exakt / 1 Tendenz
         </p>
       </div>

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { requireSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { leaderboard } from "@/lib/leaderboard";
+import Header from "@/components/Header";
 import LeaderboardList from "@/components/LeaderboardList";
 import { InviteCode, LeaveGroup } from "@/components/InviteCode";
 
@@ -27,13 +28,12 @@ export default async function GroupDetailPage({
 
   return (
     <main>
-      <header className="px-5 pt-[max(env(safe-area-inset-top),20px)] pb-2">
-        <p className="text-[13px] font-medium uppercase tracking-wide text-ink-2">
-          Tipprunde · {group.members.length}{" "}
-          {group.members.length === 1 ? "Mitglied" : "Mitglieder"}
-        </p>
-        <h1 className="text-[32px] font-bold tracking-tight">{group.name}</h1>
-      </header>
+      <Header
+        title={group.name}
+        subtitle={`Tipprunde · ${group.members.length} ${
+          group.members.length === 1 ? "Mitglied" : "Mitglieder"
+        }`}
+      />
 
       <div className="space-y-4 px-4">
         <InviteCode code={group.inviteCode} groupName={group.name} />

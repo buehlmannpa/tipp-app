@@ -37,6 +37,21 @@ Mit einem Gratis-API-Key von [football-data.org](https://www.football-data.org/c
 - **Was:** Endstände werden übernommen, die **Punkte aller Tipps sofort neu berechnet** (Rangliste damit aktuell), und sobald K.o.-Paarungen feststehen, werden die Platzhalter (Sechzehntelfinale bis Finale) **automatisch mit den richtigen Teams und Anstosszeiten befüllt**.
 - **Setup:** Auf Vercel die Env-Variablen `FOOTBALL_DATA_API_KEY` und (empfohlen) `CRON_SECRET` setzen → Redeploy. Ohne Key bleibt der manuelle Admin-Workflow.
 
+## Push-Erinnerungen (Tipp nicht vergessen!)
+
+Die App erinnert Nutzer per Push-Nachricht an offene Tipps vor anstehenden Spielen
+(täglich 9 Uhr CH-Zeit via Vercel Cron, max. 1 Erinnerung pro Gerät und Tag):
+
+1. Schlüsselpaar erzeugen: `npx web-push generate-vapid-keys`
+2. Auf Vercel setzen: `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` (z. B. `mailto:du@example.com`) → Redeploy.
+3. Nutzer aktivieren die Erinnerungen im **Profil** über den Schalter «Tipp-Erinnerungen».
+
+**iPhone:** Push funktioniert ab iOS 16.4, aber nur wenn die App über
+«Zum Home-Bildschirm» installiert wurde und von dort geöffnet wird.
+Wer öfter erinnern will (z. B. stündlich vor Anpfiff), kann `/api/cron/remind?window=3`
+von einem externen Scheduler wie cron-job.org aufrufen lassen
+(Header `Authorization: Bearer <CRON_SECRET>`).
+
 ## Bot-Schutz (Cloudflare Turnstile)
 
 Die Registrierung ist optional mit [Cloudflare Turnstile](https://www.cloudflare.com/products/turnstile/) geschützt (gratis, ohne Bilder-Rätsel):

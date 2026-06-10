@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { leaderboard } from "@/lib/leaderboard";
+import Header from "@/components/Header";
 import LeaderboardList from "@/components/LeaderboardList";
 
 export const dynamic = "force-dynamic";
@@ -27,12 +28,10 @@ export default async function RanglistePage({
 
   return (
     <main>
-      <header className="px-5 pt-[max(env(safe-area-inset-top),20px)] pb-2">
-        <p className="text-[13px] font-medium uppercase tracking-wide text-ink-2">
-          {selected ? selected.name : "Gesamtwertung"}
-        </p>
-        <h1 className="text-[32px] font-bold tracking-tight">Rangliste</h1>
-      </header>
+      <Header
+        title="Rangliste"
+        subtitle={selected ? selected.name : "Gesamtwertung"}
+      />
 
       <div className="no-scrollbar mb-4 flex gap-2 overflow-x-auto px-4 pb-1">
         <Link
@@ -58,7 +57,7 @@ export default async function RanglistePage({
 
       <div className="px-4">
         <LeaderboardList entries={entries} highlightUserId={session.userId} />
-        <p className="px-2 pt-3 text-center text-[12px] text-ink-3">
+        <p className="px-2 pt-3 text-center text-[12px] text-ink-2">
           Exaktes Resultat 3 Punkte · richtige Tendenz 1 Punkt.
           <br />
           Bei Punktgleichheit zählt die Anzahl exakter Tipps.
