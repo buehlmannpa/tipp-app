@@ -27,7 +27,24 @@ Dazu: **Profil** (Statistiken, Abmelden, Install-Anleitung) und **Verwaltung** (
 
 **Daten:** Alle 48 Teams und der echte Spielplan der Gruppenphase (72 Spiele, 11.–27. Juni 2026) sind vorbefüllt ([prisma/seed.ts](prisma/seed.ts)). Die K.o.-Spiele (Sechzehntelfinale bis Finale) sind als Platzhalter angelegt – der Admin trägt die Paarungen nach der Gruppenphase im Verwaltungs-Screen ein. Die Anstosszeiten der K.o.-Spiele sind provisorisch.
 
-**Rollen:** Der **erste registrierte Benutzer wird automatisch Admin** und erfasst die Resultate (Verwaltung → Resultat speichern → Punkte werden für alle neu berechnet).
+**Rollen:** Der **erste registrierte Benutzer wird automatisch Admin** und kann Resultate manuell erfassen (Verwaltung → Resultat speichern → Punkte werden für alle neu berechnet).
+
+## Automatischer Resultat-Sync (empfohlen)
+
+Mit einem Gratis-API-Key von [football-data.org](https://www.football-data.org/client/register) (WM im Free-Tier enthalten) holt die App Resultate **vollautomatisch**:
+
+- **Wann:** Sobald jemand die App öffnet und ein Spiel seit > 105 Minuten läuft bzw. beendet sein müsste, fragt der Server die API ab (gedrosselt auf max. 1 Anfrage pro 5 Minuten). Zusätzlich läuft täglich um 6 Uhr ein Vercel-Cron als Backup ([vercel.json](vercel.json) → `/api/cron/sync`).
+- **Was:** Endstände werden übernommen, die **Punkte aller Tipps sofort neu berechnet** (Rangliste damit aktuell), und sobald K.o.-Paarungen feststehen, werden die Platzhalter (Sechzehntelfinale bis Finale) **automatisch mit den richtigen Teams und Anstosszeiten befüllt**.
+- **Setup:** Auf Vercel die Env-Variablen `FOOTBALL_DATA_API_KEY` und (empfohlen) `CRON_SECRET` setzen → Redeploy. Ohne Key bleibt der manuelle Admin-Workflow.
+
+## Bot-Schutz (Cloudflare Turnstile)
+
+Die Registrierung ist optional mit [Cloudflare Turnstile](https://www.cloudflare.com/products/turnstile/) geschützt (gratis, ohne Bilder-Rätsel):
+
+1. Auf [dash.cloudflare.com](https://dash.cloudflare.com) → *Turnstile* → Widget für deine Domain erstellen (Modus «Managed»).
+2. Auf Vercel `NEXT_PUBLIC_TURNSTILE_SITE_KEY` und `TURNSTILE_SECRET_KEY` setzen → Redeploy.
+
+Das Widget erscheint im Registrierungsformular und wird serverseitig verifiziert. Ohne Keys läuft die Registrierung ohne Captcha (praktisch für lokale Entwicklung).
 
 ## Tech-Stack
 

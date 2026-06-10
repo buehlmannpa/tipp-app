@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Turnstile, { TURNSTILE_SITE_KEY } from "./Turnstile";
 
 export default function AuthForm({ mode }: { mode: "login" | "register" }) {
   const router = useRouter();
@@ -11,6 +12,10 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const onToken = useCallback((t: string) => setTurnstileToken(t), []);
+  const captchaPending =
+    mode === "register" && !!TURNSTILE_SITE_KEY && !turnstileToken;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -20,7 +25,9 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(
-        mode === "register" ? { email, username, password } : { email, password }
+        mode === "register"
+          ? { email, username, password, turnstileToken }
+          : { email, password }
       ),
     });
     if (res.ok) {
@@ -84,6 +91,8 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
           required
         />
 
+        {mode === "register" && <Turnstile onToken={onToken} />}
+
         {error && (
           <p className="rounded-xl bg-red/10 px-4 py-3 text-[14px] font-medium text-red">
             {error}
@@ -92,7 +101,7 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
 
         <button
           type="submit"
-          disabled={busy}
+          disabled={busy || captchaPending}
           className="w-full rounded-xl bg-tint py-3.5 text-[17px] font-semibold text-white transition-opacity active:opacity-70 disabled:opacity-50"
         >
           {busy ? "Einen Moment …" : mode === "login" ? "Anmelden" : "Account erstellen"}

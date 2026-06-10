@@ -44,7 +44,7 @@ function clean(text: string): string {
 async function loadFeed(feed: (typeof FEEDS)[number]): Promise<FeedArticle[]> {
   const res = await fetch(feed.url, {
     next: { revalidate: 600 },
-    signal: AbortSignal.timeout(8000),
+    signal: AbortSignal.timeout(4000),
     headers: { "User-Agent": "WM-Tippspiel/1.0 (+PWA)" },
   });
   if (!res.ok) return [];

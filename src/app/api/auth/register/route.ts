@@ -3,8 +3,36 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { createSession } from "@/lib/auth";
 
+async function verifyTurnstile(token: string | undefined): Promise<boolean> {
+  const secret = process.env.TURNSTILE_SECRET_KEY;
+  if (!secret) return true; // Captcha nicht konfiguriert → Prüfung übersprungen
+  if (!token) return false;
+  try {
+    const res = await fetch(
+      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ secret, response: token }),
+        signal: AbortSignal.timeout(5000),
+      }
+    );
+    const data = await res.json();
+    return data.success === true;
+  } catch {
+    return false;
+  }
+}
+
 export async function POST(req: Request) {
-  const { email, username, password } = await req.json();
+  const { email, username, password, turnstileToken } = await req.json();
+
+  if (!(await verifyTurnstile(turnstileToken))) {
+    return NextResponse.json(
+      { error: "Bot-Schutz-Prüfung fehlgeschlagen. Bitte erneut versuchen." },
+      { status: 403 }
+    );
+  }
 
   if (!email?.includes("@") || !username || username.length < 3 || !password || password.length < 8) {
     return NextResponse.json(
