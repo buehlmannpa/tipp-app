@@ -19,7 +19,7 @@ Ein Tippspiel zur Fussball-WM 2026 (USA, Kanada & Mexiko) als installierbare Web
 2. **Tipps** – Wochenansicht (Woche 1–6) wie beim SRF-Tippspiel. Resultat eintippen, automatisches Speichern. Ab Anpfiff ist der Tipp gesperrt; danach siehst du Resultat und Punkte.
 3. **Rangliste** – Gesamtwertung und pro Gruppe filterbar. Bei Punktgleichheit zählt die Anzahl exakter Tipps.
 4. **Gruppen** – Tipprunden erstellen, per 6-stelligem Einladungscode beitreten, Gruppen-Rangliste, Code via iOS-Share-Sheet teilen.
-5. **News** – Automatisch generierte deutsche Zusammenfassungen der letzten Spiele plus Vorschau auf kommende Partien.
+5. **News** – Automatisch generierte deutsche Zusammenfassungen der letzten Spiele plus Vorschau auf kommende Partien. Darunter **«Highlights & Berichte»**: echte WM-Artikel der Sportredaktionen von **kicker** (WM-Ressort) und **Sportschau** (Fussball, WM-gefiltert), serverseitig via RSS geladen und 10 Minuten gecacht ([src/lib/feeds.ts](src/lib/feeds.ts)) – ohne API-Key.
 
 Dazu: **Profil** (Statistiken, Abmelden, Install-Anleitung) und **Verwaltung** (nur Admin).
 
