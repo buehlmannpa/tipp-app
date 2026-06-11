@@ -1,6 +1,7 @@
 import { requireSession } from "@/lib/auth";
 import TabBar from "@/components/TabBar";
 import AppShell from "@/components/AppShell";
+import InstallBanner from "@/components/InstallBanner";
 
 export default async function AppLayout({
   children,
@@ -11,6 +12,7 @@ export default async function AppLayout({
       <AppShell>
         <div className="pb-32">{children}</div>
       </AppShell>
+      <InstallBanner />
       <TabBar />
     </div>
   );
