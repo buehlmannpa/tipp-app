@@ -30,7 +30,7 @@ export default function LeaderboardList({
             <span className="w-8 text-center text-[17px] font-bold tabular-nums">
               {e.rank <= 3 && e.points > 0 ? medals[e.rank - 1] : e.rank}
             </span>
-            <Avatar name={e.username} size={36} />
+            <Avatar name={e.username} emoji={e.avatar} size={36} />
             <div className="min-w-0 flex-1">
               <p className={`truncate text-[15px] ${me ? "font-bold" : "font-semibold"}`}>
                 {e.username} {me && <span className="text-[12px] text-tint">(du)</span>}

@@ -3,7 +3,8 @@ import { requireSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { leaderboard } from "@/lib/leaderboard";
 import { maybeSyncResults } from "@/lib/resultSync";
-import { fmtShort, fmtTime } from "@/lib/format";
+import { getAvatar } from "@/lib/profile";
+import { currentWeek, fmtShort, fmtTime, weekBounds } from "@/lib/format";
 import Avatar from "@/components/Avatar";
 
 export const dynamic = "force-dynamic";
@@ -13,7 +14,10 @@ export default async function Dashboard() {
   await maybeSyncResults();
   const now = new Date();
 
-  const [entries, nextMatches, lastResults, myTipCount, openThisWeek] =
+  const week = currentWeek(now);
+  const { end: weekEnd } = weekBounds(week);
+
+  const [entries, nextMatches, lastResults, myTipCount, openThisWeek, myAvatar] =
     await Promise.all([
       leaderboard(),
       prisma.match.findMany({
@@ -40,11 +44,12 @@ export default async function Dashboard() {
       prisma.match.count({
         where: {
           status: "SCHEDULED",
-          kickoff: { gte: now, lte: new Date(now.getTime() + 7 * 86400000) },
+          kickoff: { gte: now, lt: weekEnd },
           homeTeam: { isNot: null },
           tips: { none: { userId: session.userId } },
         },
       }),
+      getAvatar(session.userId),
     ]);
 
   const me = entries.find((e) => e.userId === session.userId);
@@ -62,7 +67,7 @@ export default async function Dashboard() {
           </h1>
         </div>
         <Link href="/profil" aria-label="Profil öffnen" className="mb-1">
-          <Avatar name={session.username} size={40} />
+          <Avatar name={session.username} emoji={myAvatar} size={40} />
         </Link>
       </header>
 
@@ -81,7 +86,9 @@ export default async function Dashboard() {
           >
             <div>
               <p className="text-[16px] font-bold text-white">
-                {openThisWeek} offene {openThisWeek === 1 ? "Tipp" : "Tipps"} diese Woche
+                {openThisWeek === 1
+                  ? "1 offener Tipp diese Woche"
+                  : `${openThisWeek} offene Tipps diese Woche`}
               </p>
               <p className="text-[13px] text-white/80">Jetzt tippen, bevor’s losgeht</p>
             </div>

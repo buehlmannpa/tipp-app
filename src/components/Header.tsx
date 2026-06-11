@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
+import { getAvatar } from "@/lib/profile";
 import Avatar from "./Avatar";
 
 export default async function Header({
@@ -10,6 +11,7 @@ export default async function Header({
   subtitle?: string;
 }) {
   const session = await getSession();
+  const avatar = session ? await getAvatar(session.userId) : null;
 
   return (
     <header className="flex items-end justify-between px-5 pt-[max(env(safe-area-inset-top),20px)] pb-2">
@@ -23,7 +25,7 @@ export default async function Header({
       </div>
       {session && (
         <Link href="/profil" aria-label="Profil öffnen" className="mb-1">
-          <Avatar name={session.username} size={40} />
+          <Avatar name={session.username} emoji={avatar} size={40} />
         </Link>
       )}
     </header>

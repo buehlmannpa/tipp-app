@@ -3,7 +3,7 @@ import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { leaderboard } from "@/lib/leaderboard";
 import Header from "@/components/Header";
-import Avatar from "@/components/Avatar";
+import AvatarPicker from "@/components/AvatarPicker";
 import LogoutButton from "@/components/LogoutButton";
 import ChangePassword from "@/components/ChangePassword";
 import PushToggle from "@/components/PushToggle";
@@ -25,10 +25,13 @@ export default async function ProfilPage() {
 
       <div className="space-y-4 px-4">
         <div className="card flex items-center gap-4 p-4">
-          <Avatar name={user.username} size={64} />
+          <AvatarPicker name={user.username} initialAvatar={user.avatar} />
           <div>
             <p className="text-[19px] font-bold">{user.username}</p>
             <p className="text-[14px] text-ink-2">{user.email}</p>
+            <p className="mt-0.5 text-[12px] text-ink-2">
+              Avatar antippen für eine zufällige Figur
+            </p>
             {user.isAdmin && (
               <span className="mt-1 inline-block rounded-full bg-gold/15 px-2 py-0.5 text-[12px] font-bold text-orange-deep">
                 Admin

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
 export type TipCardMatch = {
@@ -22,6 +23,7 @@ export type TipCardMatch = {
 };
 
 export default function TipCard({ match }: { match: TipCardMatch }) {
+  const router = useRouter();
   const [home, setHome] = useState<string>(match.tipHome?.toString() ?? "");
   const [away, setAway] = useState<string>(match.tipAway?.toString() ?? "");
   const [state, setState] = useState<"idle" | "saving" | "saved" | "error">("idle");
@@ -42,6 +44,8 @@ export default function TipCard({ match }: { match: TipCardMatch }) {
         }),
       });
       setState(res.ok ? "saved" : "error");
+      // Zähler («Noch X offene Tipps») und Dashboard sofort aktualisieren
+      if (res.ok) router.refresh();
     }, 500);
   }
 

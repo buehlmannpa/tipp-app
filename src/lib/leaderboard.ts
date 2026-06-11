@@ -6,6 +6,7 @@ export type LeaderboardEntry = {
   rank: number;
   userId: string;
   username: string;
+  avatar: string | null;
   points: number;
   exact: number;
   tendency: number;
@@ -19,7 +20,7 @@ export const LEADERBOARD_TAG = "leaderboard";
 const cachedEntries = unstable_cache(
   async (): Promise<Omit<LeaderboardEntry, "rank">[]> => {
     const [users, sums, exacts, tendencies] = await Promise.all([
-      prisma.user.findMany({ select: { id: true, username: true } }),
+      prisma.user.findMany({ select: { id: true, username: true, avatar: true } }),
       prisma.tip.groupBy({
         by: ["userId"],
         _sum: { points: true },
@@ -45,6 +46,7 @@ const cachedEntries = unstable_cache(
       .map((u) => ({
         userId: u.id,
         username: u.username,
+        avatar: u.avatar,
         points: sumMap.get(u.id)?._sum.points ?? 0,
         exact: exactMap.get(u.id) ?? 0,
         tendency: tendencyMap.get(u.id) ?? 0,

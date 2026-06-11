@@ -23,6 +23,18 @@ export function weekOf(kickoff: Date): number {
   );
 }
 
+export function currentWeek(now: Date = new Date()): number {
+  return now.getTime() < WEEK_START ? 1 : weekOf(now);
+}
+
+// Zeitfenster einer Tippwoche; Woche 6 läuft bis Turnierende offen
+export function weekBounds(week: number): { start: Date; end: Date | undefined } {
+  return {
+    start: new Date(WEEK_START + (week - 1) * WEEK_MS),
+    end: week >= 6 ? undefined : new Date(WEEK_START + week * WEEK_MS),
+  };
+}
+
 export function weekRangeLabel(week: number): string {
   const start = new Date(WEEK_START + (week - 1) * WEEK_MS);
   const end = new Date(start.getTime() + 6 * 24 * 60 * 60 * 1000);

@@ -39,7 +39,7 @@ export default async function SpielPage({
 
   const tips = await prisma.tip.findMany({
     where: { matchId: match.id, userId: { in: visibleUserIds } },
-    include: { user: { select: { id: true, username: true } } },
+    include: { user: { select: { id: true, username: true, avatar: true } } },
     orderBy: [{ points: "desc" }, { user: { username: "asc" } }],
   });
 
@@ -99,7 +99,7 @@ export default async function SpielPage({
                   key={tip.id}
                   className={`flex items-center gap-3 px-4 py-3 ${me ? "bg-tint-soft" : ""}`}
                 >
-                  <Avatar name={tip.user.username} size={36} />
+                  <Avatar name={tip.user.username} emoji={tip.user.avatar} size={36} />
                   <span className={`flex-1 truncate text-[15px] ${me ? "font-bold" : "font-semibold"}`}>
                     {tip.user.username}{" "}
                     {me && <span className="text-[12px] text-tint">(du)</span>}

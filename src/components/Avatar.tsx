@@ -20,10 +20,12 @@ export function avatarColor(name: string): string {
 
 export default function Avatar({
   name,
+  emoji,
   size = 36,
   className = "",
 }: {
   name: string;
+  emoji?: string | null;
   size?: number;
   className?: string;
 }) {
@@ -34,11 +36,11 @@ export default function Avatar({
       style={{
         width: size,
         height: size,
-        fontSize: size * 0.42,
+        fontSize: emoji ? size * 0.58 : size * 0.42,
         backgroundColor: avatarColor(name),
       }}
     >
-      {name.slice(0, 1).toUpperCase()}
+      {emoji ?? name.slice(0, 1).toUpperCase()}
     </span>
   );
 }
