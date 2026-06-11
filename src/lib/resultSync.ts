@@ -50,25 +50,34 @@ export function normTla(tla: string | null | undefined): string | null {
 
 const norm = normTla;
 
-// Geteilte, 5 Minuten gecachte Abfrage aller WM-Spiele (Sync + Live-Anzeige
-// nutzen denselben Next-Data-Cache – kostet kein zusätzliches API-Kontingent).
+// Geteilte Abfrage aller WM-Spiele für Sync und Live-Anzeige.
+// Eigener In-Memory-Cache (4 Min.) statt Next-Data-Cache: garantiert
+// frische Daten während Live-Spielen, ohne das API-Kontingent zu reissen
+// (max. 1 Anfrage pro 4 Min. und Server-Instanz, Limit wäre 10/Min.).
+let wcCache: { at: number; matches: ApiMatch[] } | null = null;
+const WC_CACHE_MS = 4 * 60 * 1000;
+
 export async function fetchWcMatches(): Promise<ApiMatch[]> {
   const key = process.env.FOOTBALL_DATA_API_KEY;
   if (!key) return [];
+  if (wcCache && Date.now() - wcCache.at < WC_CACHE_MS) return wcCache.matches;
+
   const res = await fetch(
     "https://api.football-data.org/v4/competitions/WC/matches",
     {
       headers: { "X-Auth-Token": key },
-      next: { revalidate: 300 },
+      cache: "no-store",
       signal: AbortSignal.timeout(8000),
     }
   );
   if (!res.ok) {
     console.error(`football-data.org antwortete mit ${res.status}`);
-    return [];
+    // Bei Fehlern (z. B. Rate-Limit) auf die letzte bekannte Antwort zurückfallen
+    return wcCache?.matches ?? [];
   }
   const data = (await res.json()) as { matches?: ApiMatch[] };
-  return data.matches ?? [];
+  wcCache = { at: Date.now(), matches: data.matches ?? [] };
+  return wcCache.matches;
 }
 
 async function rescoreMatch(matchId: number, home: number, away: number) {
