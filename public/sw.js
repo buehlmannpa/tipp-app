@@ -1,5 +1,5 @@
 // Service Worker: Offline-Fallback + Push-Benachrichtigungen
-const CACHE = "wm-tipp-v1";
+const CACHE = "wm-tipp-v2";
 const OFFLINE_URL = "/offline.html";
 
 self.addEventListener("install", (event) => {

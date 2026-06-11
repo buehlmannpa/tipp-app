@@ -182,7 +182,10 @@ export default async function Dashboard() {
             )}
             {top3.map((e, i) => (
               <div key={e.userId} className="flex items-center gap-3 px-4 py-3">
-                <span className="text-[20px]">{["🥇", "🥈", "🥉"][i]}</span>
+                <span className="w-7 text-center text-[17px] font-bold">
+                  {e.points > 0 ? ["🥇", "🥈", "🥉"][i] : e.rank}
+                </span>
+                <Avatar name={e.username} emoji={e.avatar} size={32} />
                 <span className="flex-1 text-[15px] font-semibold">{e.username}</span>
                 <span className="font-bold tabular-nums">{e.points} P.</span>
               </div>

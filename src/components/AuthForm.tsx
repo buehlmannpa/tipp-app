@@ -46,9 +46,14 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-6 pb-16">
       <div className="mb-8 text-center">
-        <div className="mb-4 inline-flex h-20 w-20 items-center justify-center rounded-[22px] bg-gradient-to-br from-[#0a84ff] to-[#0040dd] text-[40px] shadow-lg">
-          ⚽️
-        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/icons/icon-192.png"
+          alt="WM Tippspiel Logo"
+          width={96}
+          height={96}
+          className="mb-4 inline-block rounded-[24px] shadow-lg"
+        />
         <h1 className="text-[28px] font-bold tracking-tight">WM Tippspiel 2026</h1>
         <p className="mt-1 text-[15px] text-ink-2">
           {mode === "login"
