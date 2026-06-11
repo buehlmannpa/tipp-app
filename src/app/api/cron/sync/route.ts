@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
 import { syncResults, fetchWcMatches } from "@/lib/resultSync";
 import { getLiveScore } from "@/lib/liveScore";
 
@@ -27,10 +28,25 @@ export async function GET(req: Request) {
       );
       // Exakt der Code-Pfad der Spielseite (gecachte Gesamtliste)
       const cachedList = await fetchWcMatches();
+      const dbMatch1 = await prisma.match.findUnique({
+        where: { id: 1 },
+        select: { status: true, homeScore: true, awayScore: true },
+      });
+      const scoredTips = await prisma.tip.count({
+        where: { matchId: 1, points: { not: null } },
+      });
+      const apiMatch1 = cachedList.find(
+        (m) => m.homeTeam?.tla === "MEX" && m.awayTeam?.tla === "RSA"
+      );
       debug = {
         apiHttpStatus: probe.status,
         cachedListLength: cachedList.length,
         liveScorePath: await getLiveScore("MEX", "RSA"),
+        dbMatch1,
+        scoredTips,
+        apiMatch1: apiMatch1
+          ? { status: apiMatch1.status, score: apiMatch1.score?.fullTime }
+          : null,
         body: probe.ok
           ? (await probe.json()).matches?.map(
               (m: {
