@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { syncResults } from "@/lib/resultSync";
+import { syncResults, fetchWcMatches } from "@/lib/resultSync";
+import { getLiveScore } from "@/lib/liveScore";
 
 // Backup-Trigger für den Resultat-Sync (Vercel Cron, s. vercel.json).
 // Mit gesetztem CRON_SECRET nur mit passendem Bearer-Token aufrufbar.
@@ -24,8 +25,12 @@ export async function GET(req: Request) {
           signal: AbortSignal.timeout(8000),
         }
       );
+      // Exakt der Code-Pfad der Spielseite (gecachte Gesamtliste)
+      const cachedList = await fetchWcMatches();
       debug = {
         apiHttpStatus: probe.status,
+        cachedListLength: cachedList.length,
+        liveScorePath: await getLiveScore("MEX", "RSA"),
         body: probe.ok
           ? (await probe.json()).matches?.map(
               (m: {
