@@ -34,7 +34,7 @@ const TLA_ALIAS: Record<string, string> = {
   HTI: "HAI",
 };
 
-type ApiMatch = {
+export type ApiMatch = {
   utcDate: string;
   status: string;
   stage: string;
@@ -43,9 +43,32 @@ type ApiMatch = {
   score?: { fullTime?: { home: number | null; away: number | null } };
 };
 
-function norm(tla: string | null | undefined): string | null {
+export function normTla(tla: string | null | undefined): string | null {
   if (!tla) return null;
   return TLA_ALIAS[tla] ?? tla;
+}
+
+const norm = normTla;
+
+// Geteilte, 5 Minuten gecachte Abfrage aller WM-Spiele (Sync + Live-Anzeige
+// nutzen denselben Next-Data-Cache – kostet kein zusätzliches API-Kontingent).
+export async function fetchWcMatches(): Promise<ApiMatch[]> {
+  const key = process.env.FOOTBALL_DATA_API_KEY;
+  if (!key) return [];
+  const res = await fetch(
+    "https://api.football-data.org/v4/competitions/WC/matches",
+    {
+      headers: { "X-Auth-Token": key },
+      next: { revalidate: 300 },
+      signal: AbortSignal.timeout(8000),
+    }
+  );
+  if (!res.ok) {
+    console.error(`football-data.org antwortete mit ${res.status}`);
+    return [];
+  }
+  const data = (await res.json()) as { matches?: ApiMatch[] };
+  return data.matches ?? [];
 }
 
 async function rescoreMatch(matchId: number, home: number, away: number) {
@@ -98,24 +121,8 @@ export async function maybeSyncResults(): Promise<void> {
 }
 
 export async function syncResults(): Promise<{ updated: number }> {
-  const key = process.env.FOOTBALL_DATA_API_KEY;
-  if (!key) return { updated: 0 };
-
-  // Externe API max. alle 5 Minuten anfragen (Next Data Cache)
-  const res = await fetch(
-    "https://api.football-data.org/v4/competitions/WC/matches",
-    {
-      headers: { "X-Auth-Token": key },
-      next: { revalidate: 300 },
-      signal: AbortSignal.timeout(8000),
-    }
-  );
-  if (!res.ok) {
-    console.error(`football-data.org antwortete mit ${res.status}`);
-    return { updated: 0 };
-  }
-  const data = (await res.json()) as { matches?: ApiMatch[] };
-  if (!data.matches?.length) return { updated: 0 };
+  const apiMatches = await fetchWcMatches();
+  if (!apiMatches.length) return { updated: 0 };
 
   const [ourMatches, teams] = await Promise.all([
     prisma.match.findMany(),
@@ -139,7 +146,7 @@ export async function syncResults(): Promise<{ updated: number }> {
 
   let updated = 0;
 
-  for (const am of data.matches) {
+  for (const am of apiMatches) {
     const stage = STAGE_MAP[am.stage];
     const home = norm(am.homeTeam?.tla);
     const away = norm(am.awayTeam?.tla);

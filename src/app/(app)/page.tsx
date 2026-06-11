@@ -110,7 +110,11 @@ export default async function Dashboard() {
               </p>
             )}
             {nextMatches.map((m) => (
-              <div key={m.id} className="flex items-center gap-3 px-4 py-3">
+              <Link
+                key={m.id}
+                href={`/spiel/${m.id}`}
+                className="flex items-center gap-3 px-4 py-3 active:bg-card-2"
+              >
                 <div className="w-14 text-[12px] leading-tight text-ink-2">
                   {fmtShort(m.kickoff)}
                   <br />
@@ -126,14 +130,12 @@ export default async function Dashboard() {
                     Tipp {m.tips[0].homeGoals}:{m.tips[0].awayGoals}
                   </span>
                 ) : (
-                  <Link
-                    href="/tipps"
-                    className="rounded-full bg-orange/15 px-2 py-0.5 text-[12px] font-bold text-orange-deep"
-                  >
+                  <span className="rounded-full bg-orange/15 px-2 py-0.5 text-[12px] font-bold text-orange-deep">
                     offen
-                  </Link>
+                  </span>
                 )}
-              </div>
+                <span className="text-ink-2">›</span>
+              </Link>
             ))}
           </div>
         </section>
