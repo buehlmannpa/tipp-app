@@ -4,6 +4,8 @@ import { prisma } from "@/lib/db";
 import { leaderboard } from "@/lib/leaderboard";
 import { maybeSyncResults } from "@/lib/resultSync";
 import { getAvatar } from "@/lib/profile";
+import { maybeSendLockWarnings } from "@/lib/lockwarn";
+import { TIP_LOCK_MS } from "@/lib/scoring";
 import { currentWeek, fmtShort, fmtTime, weekBounds } from "@/lib/format";
 import Avatar from "@/components/Avatar";
 
@@ -12,6 +14,7 @@ export const dynamic = "force-dynamic";
 export default async function Dashboard() {
   const session = await requireSession();
   await maybeSyncResults();
+  await maybeSendLockWarnings();
   const now = new Date();
 
   const week = currentWeek(now);
@@ -44,7 +47,8 @@ export default async function Dashboard() {
       prisma.match.count({
         where: {
           status: "SCHEDULED",
-          kickoff: { gte: now, lt: weekEnd },
+          // tippbar = Tippschluss (1 h vor Anpfiff) noch nicht erreicht
+          kickoff: { gt: new Date(now.getTime() + TIP_LOCK_MS), lt: weekEnd },
           homeTeam: { isNot: null },
           tips: { none: { userId: session.userId } },
         },

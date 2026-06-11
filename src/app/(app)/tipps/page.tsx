@@ -2,6 +2,8 @@ import Link from "next/link";
 import { requireSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { maybeSyncResults } from "@/lib/resultSync";
+import { maybeSendLockWarnings } from "@/lib/lockwarn";
+import { isTipLocked } from "@/lib/scoring";
 import {
   fmtDay,
   fmtTime,
@@ -25,6 +27,7 @@ export default async function TippsPage({
 }) {
   const session = await requireSession();
   await maybeSyncResults();
+  await maybeSendLockWarnings();
   const params = await searchParams;
   const now = new Date();
   const currentWeek =
@@ -58,7 +61,7 @@ export default async function TippsPage({
   const openCount = weekMatches.filter(
     (m) =>
       m.status === "SCHEDULED" &&
-      m.kickoff > now &&
+      !isTipLocked(m.kickoff, now) &&
       m.homeTeamId &&
       m.tips.length === 0
   ).length;
@@ -93,6 +96,9 @@ export default async function TippsPage({
           </span>
         </div>
       )}
+      <p className="mb-3 px-5 text-[12px] text-ink-2">
+        🔒 Tippschluss ist jeweils 1 Stunde vor Anpfiff.
+      </p>
 
       <div className="space-y-5 px-4">
         {weekMatches.length === 0 && (
@@ -144,7 +150,7 @@ export default async function TippsPage({
                   homeFlag: m.homeTeam.flag,
                   awayName: m.awayTeam.name,
                   awayFlag: m.awayTeam.flag,
-                  locked: m.kickoff <= now || m.status !== "SCHEDULED",
+                  locked: isTipLocked(m.kickoff, now) || m.status !== "SCHEDULED",
                   homeScore: m.homeScore,
                   awayScore: m.awayScore,
                   tipHome: tip?.homeGoals ?? null,

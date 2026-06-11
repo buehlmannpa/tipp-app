@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Hintergrund -->
+  <rect width="1024" height="1024" fill="#1b2342"/>
+
+  <!-- Sterne -->
+  <g fill="#f2b32a">
+    <path d="M512 78l26 53 59 9-43 41 10 58-52-27-52 27 10-58-43-41 59-9z"/>
+    <path d="M348 142l18 37 41 6-30 29 7 41-36-19-36 19 7-41-30-29 41-6z"/>
+    <path d="M676 142l18 37 41 6-30 29 7 41-36-19-36 19 7-41-30-29 41-6z"/>
+  </g>
+
+  <!-- Globus (Mitte) -->
+  <g>
+    <circle cx="512" cy="392" r="178" fill="#1b2342" stroke="#ffffff" stroke-width="18"/>
+    <g fill="#ffffff">
+      <path d="M430 268c30-14 70-18 102-8-8 22-30 32-52 36-18 4-30 18-46 14-14-4-16-30-4-42z"/>
+      <path d="M560 300c26 6 54 2 76 18 14 12 20 32 12 48-12 22-42 18-62 30-16 8-36 6-46-8-12-18 0-42 8-60 4-12 4-24 12-28z"/>
+      <path d="M388 360c20-2 44 4 50 24 6 22-12 40-10 62 2 18 22 28 22 46 0 16-18 28-34 24-28-8-48-34-56-62-8-32 0-70 28-94z"/>
+      <path d="M560 432c18-10 42-8 58 6 14 14 12 38 28 50 10 8 8 24-2 32-18 14-44 18-64 8-22-12-36-36-34-60 2-14 2-30 14-36z"/>
+      <path d="M488 530c14-2 28 8 30 22 2 12-8 24-20 26-14 2-28-6-30-20-2-14 6-26 20-28z"/>
+    </g>
+  </g>
+
+  <!-- Fussball (links) -->
+  <g>
+    <circle cx="290" cy="430" r="158" fill="#ffffff" stroke="#1b2342" stroke-width="10"/>
+    <polygon points="290,350 215,405 244,492 336,492 365,405" fill="#1b2342"/>
+    <g stroke="#1b2342" stroke-width="14" stroke-linecap="round" fill="none">
+      <path d="M290 350V282"/>
+      <path d="M215 405l-62-32"/>
+      <path d="M365 405l62-32"/>
+      <path d="M244 492l-40 62"/>
+      <path d="M336 492l40 62"/>
+    </g>
+    <circle cx="290" cy="430" r="158" fill="none" stroke="#ffffff" stroke-width="16"/>
+  </g>
+
+  <!-- Football (rechts) -->
+  <g transform="rotate(-28 740 420)">
+    <ellipse cx="740" cy="420" rx="172" ry="108" fill="#8a4b2d" stroke="#ffffff" stroke-width="16"/>
+    <path d="M740 332v176" stroke="#ffffff" stroke-width="0"/>
+    <g stroke="#ffffff" stroke-width="14" stroke-linecap="round">
+      <path d="M664 420h152"/>
+      <path d="M688 392v56"/>
+      <path d="M722 392v56"/>
+      <path d="M756 392v56"/>
+      <path d="M790 392v56"/>
+    </g>
+  </g>
+
+  <!-- Schild -->
+  <path d="M96 552 H928 V762 L512 986 L96 762 Z" fill="#1b2342" stroke="#ffffff" stroke-width="22" stroke-linejoin="round"/>
+
+  <!-- Titel -->
+  <text x="512" y="688" text-anchor="middle" font-family="Helvetica, Arial, sans-serif"
+        font-size="132" font-weight="900" fill="#ffffff" textLength="760"
+        lengthAdjust="spacingAndGlyphs">TIPPSPIEL</text>
+
+  <!-- Flaggenreihe 1: BRA GER ARG FRA ENG USA -->
+  <g transform="translate(0,724)">
+    <!-- BRA -->
+    <g transform="translate(178,0)">
+      <rect width="96" height="58" fill="#1a9850"/>
+      <polygon points="48,7 86,29 48,51 10,29" fill="#f2c41d"/>
+      <circle cx="48" cy="29" r="11" fill="#2a4d9c"/>
+    </g>
+    <!-- GER -->
+    <g transform="translate(286,0)">
+      <rect width="96" height="58" fill="#000000"/>
+      <rect y="19" width="96" height="20" fill="#d22730"/>
+      <rect y="39" width="96" height="19" fill="#f2c41d"/>
+    </g>
+    <!-- ARG -->
+    <g transform="translate(394,0)">
+      <rect width="96" height="58" fill="#7fb8e6"/>
+      <rect y="19" width="96" height="20" fill="#ffffff"/>
+      <circle cx="48" cy="29" r="7" fill="#f2c41d"/>
+    </g>
+    <!-- FRA -->
+    <g transform="translate(502,0)">
+      <rect width="32" height="58" fill="#2a4d9c"/>
+      <rect x="32" width="32" height="58" fill="#ffffff"/>
+      <rect x="64" width="32" height="58" fill="#d22730"/>
+    </g>
+    <!-- ENG -->
+    <g transform="translate(610,0)">
+      <rect width="96" height="58" fill="#ffffff"/>
+      <rect y="23" width="96" height="12" fill="#d22730"/>
+      <rect x="42" width="12" height="58" fill="#d22730"/>
+    </g>
+    <!-- USA -->
+    <g transform="translate(718,0)">
+      <rect width="96" height="58" fill="#ffffff"/>
+      <g fill="#d22730">
+        <rect y="0" width="96" height="8"/><rect y="16" width="96" height="9"/>
+        <rect y="33" width="96" height="9"/><rect y="50" width="96" height="8"/>
+      </g>
+      <rect width="44" height="30" fill="#2a4d9c"/>
+    </g>
+  </g>
+
+  <!-- Flaggenreihe 2: POR JPN ITA NED SUI -->
+  <g transform="translate(0,796)">
+    <!-- POR -->
+    <g transform="translate(244,0)">
+      <rect width="92" height="56" fill="#d22730"/>
+      <rect width="36" height="56" fill="#1a9850"/>
+      <circle cx="36" cy="28" r="10" fill="#f2c41d"/>
+    </g>
+    <!-- JPN -->
+    <g transform="translate(348,0)">
+      <rect width="92" height="56" fill="#ffffff"/>
+      <circle cx="46" cy="28" r="14" fill="#d22730"/>
+    </g>
+    <!-- ITA -->
+    <g transform="translate(452,0)">
+      <rect width="31" height="56" fill="#1a9850"/>
+      <rect x="31" width="31" height="56" fill="#ffffff"/>
+      <rect x="62" width="30" height="56" fill="#d22730"/>
+    </g>
+    <!-- NED -->
+    <g transform="translate(556,0)">
+      <rect width="92" height="56" fill="#d22730"/>
+      <rect y="19" width="92" height="19" fill="#ffffff"/>
+      <rect y="38" width="92" height="18" fill="#2a4d9c"/>
+    </g>
+    <!-- SUI -->
+    <g transform="translate(660,0)">
+      <rect width="92" height="56" fill="#d22730"/>
+      <rect x="36" y="12" width="20" height="32" fill="#ffffff"/>
+      <rect x="26" y="22" width="40" height="12" fill="#ffffff"/>
+    </g>
+  </g>
+</svg>

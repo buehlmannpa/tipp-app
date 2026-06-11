@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { pushConfigured, sendPush } from "@/lib/push";
+import { TIP_LOCK_MS } from "@/lib/scoring";
 
 // Tipp-Erinnerung: benachrichtigt Benutzer mit fehlenden Tipps für Spiele,
 // die innerhalb des Zeitfensters anstossen (Standard: bis Tagesende CH).
@@ -23,7 +24,8 @@ export async function GET(req: Request) {
   const upcoming = await prisma.match.findMany({
     where: {
       status: "SCHEDULED",
-      kickoff: { gt: now, lte: until },
+      // nur Spiele, deren Tippschluss (1 h vor Anpfiff) noch nicht erreicht ist
+      kickoff: { gt: new Date(now.getTime() + TIP_LOCK_MS), lte: until },
       homeTeamId: { not: null },
     },
     include: { homeTeam: true, awayTeam: true, tips: { select: { userId: true } } },

@@ -22,6 +22,24 @@ export async function POST(req: Request) {
     );
   }
 
+  // Limite: max. 5 selbst erstellte Gruppen pro Benutzer (Admins ausgenommen)
+  const user = await prisma.user.findUnique({ where: { id: session.userId } });
+  if (!user) {
+    return NextResponse.json({ error: "Nicht angemeldet." }, { status: 401 });
+  }
+  if (!user.isAdmin) {
+    const owned = await prisma.group.count({ where: { ownerId: user.id } });
+    if (owned >= 5) {
+      return NextResponse.json(
+        {
+          error:
+            "Limite erreicht: Du kannst maximal 5 Gruppen erstellen. Lösche eine bestehende Gruppe (verlassen als letztes Mitglied) oder tritt Gruppen anderer bei.",
+        },
+        { status: 403 }
+      );
+    }
+  }
+
   const group = await prisma.group.create({
     data: {
       name: name.trim(),

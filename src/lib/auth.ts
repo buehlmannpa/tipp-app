@@ -56,3 +56,15 @@ export async function requireUser() {
   if (!user) redirect("/login");
   return user;
 }
+
+/**
+ * Admin-Prüfung für API-Routen: Session UND Admin-Flag frisch aus der DB.
+ * Ein manipuliertes/veraltetes Token reicht damit nicht – entzogene
+ * Admin-Rechte greifen sofort. Gibt null zurück, wenn kein Admin.
+ */
+export async function getAdminUser() {
+  const session = await getSession();
+  if (!session) return null;
+  const user = await prisma.user.findUnique({ where: { id: session.userId } });
+  return user?.isAdmin ? user : null;
+}

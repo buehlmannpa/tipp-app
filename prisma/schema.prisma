@@ -19,6 +19,18 @@ model User {
   memberships   GroupMember[]
   ownedGroups   Group[]            @relation("GroupOwner")
   subscriptions PushSubscription[]
+  reminders     SentReminder[]
+}
+
+// Verhindert doppelte «Gleich Tippschluss»-Benachrichtigungen
+model SentReminder {
+  userId  String
+  matchId Int
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  match   Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  sentAt  DateTime @default(now())
+
+  @@id([userId, matchId])
 }
 
 model Group {
@@ -93,6 +105,7 @@ model Match {
   status          MatchStatus @default(SCHEDULED)
   city            String
   tips            Tip[]
+  reminders       SentReminder[]
 }
 
 model Tip {

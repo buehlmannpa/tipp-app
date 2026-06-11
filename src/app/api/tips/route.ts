@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { isTipLocked } from "@/lib/scoring";
 
 export async function POST(req: Request) {
   const session = await getSession();
@@ -17,9 +18,11 @@ export async function POST(req: Request) {
   if (!match || !match.homeTeamId || !match.awayTeamId) {
     return NextResponse.json({ error: "Spiel nicht gefunden." }, { status: 404 });
   }
-  if (match.kickoff <= new Date() || match.status !== "SCHEDULED") {
+  // Massgeblich ist ausschliesslich diese Server-Prüfung – im Browser
+  // freigeschaltete Eingabefelder ändern daran nichts.
+  if (isTipLocked(match.kickoff) || match.status !== "SCHEDULED") {
     return NextResponse.json(
-      { error: "Das Spiel hat bereits begonnen – Tipp nicht mehr möglich." },
+      { error: "Tippschluss: Tipps sind nur bis 1 Stunde vor Anpfiff möglich." },
       { status: 403 }
     );
   }

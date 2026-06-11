@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
-import { getSession } from "@/lib/auth";
+import { getAdminUser } from "@/lib/auth";
 
 // Admin setzt ein temporäres Passwort für einen Benutzer (z. B. wenn vergessen).
 // Das Temp-Passwort wird einmalig angezeigt; der Benutzer ändert es im Profil.
 export async function POST(req: Request) {
-  const session = await getSession();
-  if (!session?.isAdmin) {
+  if (!(await getAdminUser())) {
     return NextResponse.json({ error: "Nur für Admins." }, { status: 403 });
   }
 

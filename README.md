@@ -27,7 +27,9 @@ Dazu: **Profil** (Statistiken, Abmelden, Install-Anleitung) und **Verwaltung** (
 
 **Daten:** Alle 48 Teams und der echte Spielplan der Gruppenphase (72 Spiele, 11.–27. Juni 2026) sind vorbefüllt ([prisma/seed.ts](prisma/seed.ts)). Die K.o.-Spiele (Sechzehntelfinale bis Finale) sind als Platzhalter angelegt – der Admin trägt die Paarungen nach der Gruppenphase im Verwaltungs-Screen ein. Die Anstosszeiten der K.o.-Spiele sind provisorisch.
 
-**Rollen:** Der **erste registrierte Benutzer wird automatisch Admin** und kann Resultate manuell erfassen (Verwaltung → Resultat speichern → Punkte werden für alle neu berechnet).
+**Rollen:** Der **erste registrierte Benutzer wird automatisch Admin**. Das Admin-Dashboard (Profil → Verwaltung) bietet: Kennzahlen-Übersicht (Benutzer, Gruppen, Tipps, Push-Geräte, fällige Resultate), Resultat-Erfassung, K.o.-Paarungen, **Gruppen-Verwaltung** (alle Gruppen einsehen, umbenennen, Einladungscode erneuern, löschen) und Benutzer-Verwaltung (Passwort-Reset). Alle Admin-Endpunkte prüfen die Admin-Rolle **serverseitig frisch aus der Datenbank** – ein manipuliertes Session-Token genügt nicht.
+
+**Spielregeln:** **Tippschluss ist 1 Stunde vor Anpfiff** (serverseitig erzwungen – auch direkte API-Aufrufe oder im Browser freigeschaltete Felder werden abgelehnt). Ab Tippschluss werden die Tipps der Gruppenmitglieder sichtbar. Normale Benutzer können **maximal 5 Gruppen** erstellen (Admins unbegrenzt). 15 Minuten vor Tippschluss erhalten Push-Abonnenten ohne Tipp eine Warnung («Noch 15 Min. zum Tippen!») – ausgelöst durch App-Traffic oder garantiert via externem Scheduler: `/api/cron/lockwarn` alle 5 Minuten aufrufen (z. B. cron-job.org, Header `Authorization: Bearer <CRON_SECRET>`).
 
 ## Automatischer Resultat-Sync (empfohlen)
 

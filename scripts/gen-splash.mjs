@@ -12,32 +12,39 @@ const sizes = [
   [750, 1334], // iPhone SE 2/3, 8
 ];
 
-const svg = (w, h) => {
-  const cx = w / 2;
-  const cy = h / 2 - w * 0.05;
-  const r = w * 0.13;
-  return `
-<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#0a84ff"/>
-      <stop offset="1" stop-color="#0040dd"/>
-    </linearGradient>
-  </defs>
-  <rect width="${w}" height="${h}" fill="#f2f2f7"/>
-  <rect x="${cx - r * 1.55}" y="${cy - r * 1.55}" width="${r * 3.1}" height="${r * 3.1}"
-        rx="${r * 0.7}" fill="url(#bg)"/>
-  <circle cx="${cx}" cy="${cy}" r="${r}" fill="#ffffff"/>
-  <polygon fill="#1c1c1e" transform="rotate(8 ${cx} ${cy})"
-           points="${cx},${cy - r * 0.55} ${cx - r * 0.52},${cy - r * 0.17} ${cx - r * 0.32},${cy + r * 0.45} ${cx + r * 0.32},${cy + r * 0.45} ${cx + r * 0.52},${cy - r * 0.17}"/>
-  <text x="${cx}" y="${cy + r * 2.2}" text-anchor="middle"
-        font-family="Helvetica, Arial, sans-serif" font-size="${w * 0.045}"
-        font-weight="bold" fill="#000000">WM Tippspiel 2026</text>
-</svg>`;
-};
+// Logo (abgerundet) zentriert auf dunklem Hintergrund – passend zum Logo-Navy
+import { readFileSync } from "node:fs";
+
+const logoSvg = readFileSync("assets/logo.svg");
 
 mkdirSync("public/splash", { recursive: true });
 for (const [w, h] of sizes) {
-  await sharp(Buffer.from(svg(w, h))).png().toFile(`public/splash/splash-${w}x${h}.png`);
+  const logoSize = Math.round(w * 0.55);
+  const radius = Math.round(logoSize * 0.22);
+  const logo = await sharp(logoSvg)
+    .resize(logoSize, logoSize)
+    .composite([
+      {
+        input: Buffer.from(
+          `<svg width="${logoSize}" height="${logoSize}"><rect width="${logoSize}" height="${logoSize}" rx="${radius}" fill="#fff"/></svg>`
+        ),
+        blend: "dest-in",
+      },
+    ])
+    .png()
+    .toBuffer();
+
+  await sharp({
+    create: { width: w, height: h, channels: 4, background: "#1b2342" },
+  })
+    .composite([
+      {
+        input: logo,
+        left: Math.round((w - logoSize) / 2),
+        top: Math.round((h - logoSize) / 2) - Math.round(h * 0.03),
+      },
+    ])
+    .png()
+    .toFile(`public/splash/splash-${w}x${h}.png`);
   console.log(`splash-${w}x${h}.png erstellt`);
 }

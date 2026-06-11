@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { prisma } from "@/lib/db";
-import { getSession } from "@/lib/auth";
+import { getAdminUser } from "@/lib/auth";
 import { calcPoints } from "@/lib/scoring";
 import { LEADERBOARD_TAG } from "@/lib/leaderboard";
 
 // Resultat erfassen und alle Tipps zu diesem Spiel neu bewerten
 export async function POST(req: Request) {
-  const session = await getSession();
-  if (!session?.isAdmin) {
+  if (!(await getAdminUser())) {
     return NextResponse.json({ error: "Nur für Admins." }, { status: 403 });
   }
 

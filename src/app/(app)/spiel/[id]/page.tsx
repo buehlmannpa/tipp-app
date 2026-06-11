@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { requireSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { fmtDay, fmtTime, STAGE_LABELS } from "@/lib/format";
+import { isTipLocked } from "@/lib/scoring";
 import Header from "@/components/Header";
 import Avatar from "@/components/Avatar";
 
@@ -23,7 +24,9 @@ export default async function SpielPage({
   });
   if (!match || !match.homeTeam || !match.awayTeam) notFound();
 
-  const locked = match.kickoff <= new Date() || match.status !== "SCHEDULED";
+  // Sichtbar werden fremde Tipps erst ab Tippschluss – ab dann kann
+  // niemand mehr ändern, abschauen ist also ausgeschlossen.
+  const locked = isTipLocked(match.kickoff) || match.status !== "SCHEDULED";
   const finished = match.homeScore !== null;
 
   // Mitglieder aller eigenen Gruppen (Tipps sind erst nach Anpfiff sichtbar)
@@ -81,7 +84,8 @@ export default async function SpielPage({
           </h2>
           {!locked && (
             <p className="mb-2 px-1 text-[13px] text-ink-2">
-              Die Tipps der anderen werden nach Anpfiff sichtbar.
+              Die Tipps der anderen werden ab Tippschluss (1 Stunde vor Anpfiff)
+              sichtbar.
             </p>
           )}
           <div className="card divide-y divide-sep overflow-hidden">
