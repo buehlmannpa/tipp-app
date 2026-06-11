@@ -17,6 +17,7 @@ export type TipCardMatch = {
   locked: boolean;
   homeScore: number | null;
   awayScore: number | null;
+  live: { home: number; away: number; paused: boolean } | null;
   tipHome: number | null;
   tipAway: number | null;
   points: number | null;
@@ -68,8 +69,22 @@ export default function TipCard({ match }: { match: TipCardMatch }) {
 
         {match.locked ? (
           <div className="flex min-w-[84px] flex-col items-center">
-            <span className="text-[22px] font-bold tabular-nums">
-              {finished ? `${match.homeScore}:${match.awayScore}` : "–:–"}
+            {match.live && !finished && (
+              <span className="mb-0.5 inline-flex items-center gap-1 rounded-full bg-red/15 px-2 py-0.5 text-[10px] font-bold text-red">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red" />
+                {match.live.paused ? "HALBZEIT" : "LIVE"}
+              </span>
+            )}
+            <span
+              className={`text-[22px] font-bold tabular-nums ${
+                match.live && !finished ? "text-red" : ""
+              }`}
+            >
+              {finished
+                ? `${match.homeScore}:${match.awayScore}`
+                : match.live
+                  ? `${match.live.home}:${match.live.away}`
+                  : "–:–"}
             </span>
             {match.tipHome !== null && (
               <span className="text-[11px] text-ink-2">

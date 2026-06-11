@@ -50,20 +50,18 @@ export function normTla(tla: string | null | undefined): string | null {
 
 const norm = normTla;
 
-// Geteilte Abfrage aller WM-Spiele für Sync und Live-Anzeige.
-// Eigener In-Memory-Cache (4 Min.) statt Next-Data-Cache: garantiert
-// frische Daten während Live-Spielen, ohne das API-Kontingent zu reissen
-// (max. 1 Anfrage pro 4 Min. und Server-Instanz, Limit wäre 10/Min.).
+// Geteilte Abfrage der relevanten WM-Spiele für Sync und Live-Anzeige.
+// Wichtig: Die ungefilterte Gesamtliste wird bei football-data aggressiv
+// gecacht und liefert während Live-Spielen veraltete Stände. Deshalb drei
+// gezielte (frischere) Abfragen, zusammengeführt – Live/Beendet gewinnen.
+// In-Memory-Cache 3 Min. pro Instanz; 3 Calls/3 Min. liegt weit unter dem
+// Limit von 10 Anfragen/Minute.
 let wcCache: { at: number; matches: ApiMatch[] } | null = null;
-const WC_CACHE_MS = 4 * 60 * 1000;
+const WC_CACHE_MS = 3 * 60 * 1000;
 
-export async function fetchWcMatches(): Promise<ApiMatch[]> {
-  const key = process.env.FOOTBALL_DATA_API_KEY;
-  if (!key) return [];
-  if (wcCache && Date.now() - wcCache.at < WC_CACHE_MS) return wcCache.matches;
-
+async function apiGet(key: string, params: string): Promise<ApiMatch[]> {
   const res = await fetch(
-    "https://api.football-data.org/v4/competitions/WC/matches",
+    `https://api.football-data.org/v4/competitions/WC/matches${params}`,
     {
       headers: { "X-Auth-Token": key },
       cache: "no-store",
@@ -71,12 +69,42 @@ export async function fetchWcMatches(): Promise<ApiMatch[]> {
     }
   );
   if (!res.ok) {
-    console.error(`football-data.org antwortete mit ${res.status}`);
-    // Bei Fehlern (z. B. Rate-Limit) auf die letzte bekannte Antwort zurückfallen
-    return wcCache?.matches ?? [];
+    console.error(`football-data.org (${params}) antwortete mit ${res.status}`);
+    return [];
   }
   const data = (await res.json()) as { matches?: ApiMatch[] };
-  wcCache = { at: Date.now(), matches: data.matches ?? [] };
+  return data.matches ?? [];
+}
+
+function isoDay(offsetDays: number): string {
+  return new Date(Date.now() + offsetDays * 86400000).toISOString().slice(0, 10);
+}
+
+export async function fetchWcMatches(): Promise<ApiMatch[]> {
+  const key = process.env.FOOTBALL_DATA_API_KEY;
+  if (!key) return [];
+  if (wcCache && Date.now() - wcCache.at < WC_CACHE_MS) return wcCache.matches;
+
+  const [windowed, finished, live] = await Promise.all([
+    // Umfeld: gestern bis +6 Tage (deckt fällige Resultate und K.o.-Paarungen ab)
+    apiGet(key, `?dateFrom=${isoDay(-2)}&dateTo=${isoDay(6)}`),
+    apiGet(key, `?status=FINISHED&dateFrom=${isoDay(-2)}&dateTo=${isoDay(1)}`),
+    apiGet(key, `?status=LIVE`),
+  ]);
+
+  if (windowed.length + finished.length + live.length === 0) {
+    return wcCache?.matches ?? [];
+  }
+
+  // Zusammenführen pro Paarung; spätere Quellen (frischer) überschreiben
+  const byPair = new Map<string, ApiMatch>();
+  for (const list of [windowed, finished, live]) {
+    for (const m of list) {
+      const k = `${m.homeTeam?.tla}-${m.awayTeam?.tla}`;
+      byPair.set(k, m);
+    }
+  }
+  wcCache = { at: Date.now(), matches: [...byPair.values()] };
   return wcCache.matches;
 }
 

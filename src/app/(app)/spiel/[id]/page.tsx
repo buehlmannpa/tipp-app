@@ -130,6 +130,7 @@ export default async function SpielPage({
                   locked: false,
                   homeScore: null,
                   awayScore: null,
+                  live: null,
                   tipHome: myTip?.homeGoals ?? null,
                   tipAway: myTip?.awayGoals ?? null,
                   points: null,

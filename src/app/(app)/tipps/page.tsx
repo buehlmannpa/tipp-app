@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { maybeSyncResults } from "@/lib/resultSync";
 import { maybeSendLockWarnings } from "@/lib/lockwarn";
 import { isTipLocked } from "@/lib/scoring";
+import { getLiveScore, type LiveScore } from "@/lib/liveScore";
 import {
   fmtDay,
   fmtTime,
@@ -49,6 +50,24 @@ export default async function TippsPage({
     },
     orderBy: { kickoff: "asc" },
   });
+
+  // Live-Zwischenstände für gerade laufende Spiele (geteilter 3-Min-Cache)
+  const liveScores = new Map<number, LiveScore>();
+  await Promise.all(
+    weekMatches
+      .filter(
+        (m) =>
+          m.status === "SCHEDULED" &&
+          m.kickoff <= now &&
+          m.homeScore === null &&
+          m.homeTeamId &&
+          m.awayTeamId
+      )
+      .map(async (m) => {
+        const live = await getLiveScore(m.homeTeamId!, m.awayTeamId!);
+        if (live) liveScores.set(m.id, live);
+      })
+  );
 
   // Nach Tag gruppieren
   const byDay = new Map<string, typeof weekMatches>();
@@ -153,6 +172,7 @@ export default async function TippsPage({
                   locked: isTipLocked(m.kickoff, now) || m.status !== "SCHEDULED",
                   homeScore: m.homeScore,
                   awayScore: m.awayScore,
+                  live: liveScores.get(m.id) ?? null,
                   tipHome: tip?.homeGoals ?? null,
                   tipAway: tip?.awayGoals ?? null,
                   points: tip?.points ?? null,
