@@ -9,5 +9,9 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Nicht erlaubt." }, { status: 401 });
   }
   const result = await syncResults();
-  return NextResponse.json({ ok: true, ...result });
+  return NextResponse.json({
+    ok: true,
+    ...result,
+    apiKeyConfigured: Boolean(process.env.FOOTBALL_DATA_API_KEY),
+  });
 }
