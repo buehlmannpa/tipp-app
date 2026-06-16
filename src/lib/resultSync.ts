@@ -224,6 +224,21 @@ export async function syncResults(): Promise<{ updated: number }> {
     }
     if (!match) continue;
 
+    // Anstosszeit selbstkorrigierend: football-data ist die Quelle der
+    // Wahrheit. Weicht unsere gespeicherte Zeit um > 2 Min. ab, übernehmen
+    // wir die echte Zeit (nur solange das Spiel noch nicht beendet ist).
+    if (match.status !== "FINISHED") {
+      const apiKickoff = new Date(am.utcDate);
+      if (Math.abs(apiKickoff.getTime() - match.kickoff.getTime()) > 2 * 60 * 1000) {
+        await prisma.match.update({
+          where: { id: match.id },
+          data: { kickoff: apiKickoff },
+        });
+        match.kickoff = apiKickoff;
+        updated++;
+      }
+    }
+
     // Endstand übernehmen und Punkte vergeben
     const ft = am.score?.fullTime;
     if (
