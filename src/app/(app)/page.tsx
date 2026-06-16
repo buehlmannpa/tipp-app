@@ -31,7 +31,7 @@ export default async function Dashboard() {
           tips: { where: { userId: session.userId } },
         },
         orderBy: { kickoff: "asc" },
-        take: 3,
+        take: 2,
       }),
       prisma.match.findMany({
         where: { status: "FINISHED" },

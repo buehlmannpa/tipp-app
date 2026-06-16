@@ -7,6 +7,7 @@ import AvatarPicker from "@/components/AvatarPicker";
 import LogoutButton from "@/components/LogoutButton";
 import ChangePassword from "@/components/ChangePassword";
 import PushToggle from "@/components/PushToggle";
+import ThemeToggle from "@/components/ThemeToggle";
 import InstallHint from "@/components/InstallHint";
 
 export const dynamic = "force-dynamic";
@@ -47,6 +48,8 @@ export default async function ProfilPage() {
           <Row label="Abgegebene Tipps" value={`${me?.tipped ?? 0}`} />
           <Row label="Gruppen" value={`${groupCount}`} />
         </div>
+
+        <ThemeToggle />
 
         <PushToggle />
 

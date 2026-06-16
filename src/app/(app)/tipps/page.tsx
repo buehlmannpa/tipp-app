@@ -69,13 +69,21 @@ export default async function TippsPage({
       })
   );
 
-  // Nach Tag gruppieren
-  const byDay = new Map<string, typeof weekMatches>();
-  for (const m of weekMatches) {
-    const day = fmtDay(m.kickoff);
-    if (!byDay.has(day)) byDay.set(day, []);
-    byDay.get(day)!.push(m);
-  }
+  // Anstehende/laufende Spiele zuoberst (chronologisch aufsteigend),
+  // beendete Spiele nach unten (neuste zuerst).
+  const isDone = (m: (typeof weekMatches)[number]) => m.status === "FINISHED";
+  const openMatches = weekMatches.filter((m) => !isDone(m));
+  const doneMatches = weekMatches.filter(isDone).reverse();
+
+  const groupByDay = (list: typeof weekMatches) => {
+    const map = new Map<string, typeof weekMatches>();
+    for (const m of list) {
+      const day = fmtDay(m.kickoff);
+      if (!map.has(day)) map.set(day, []);
+      map.get(day)!.push(m);
+    }
+    return [...map.entries()];
+  };
 
   const openCount = weekMatches.filter(
     (m) =>
@@ -85,8 +93,63 @@ export default async function TippsPage({
       m.tips.length === 0
   ).length;
 
-  // In der laufenden Woche direkt zum heutigen Tag springen
-  const todayLabel = week === currentWeek ? fmtDay(now) : null;
+  const renderMatch = (m: (typeof weekMatches)[number]) => {
+    if (!m.homeTeam || !m.awayTeam) {
+      return (
+        <div key={m.id} className="card p-4">
+          <div className="mb-1 flex items-center justify-between text-[12px] text-ink-2">
+            <span className="rounded-full bg-card-2 px-2 py-0.5 font-semibold">
+              {STAGE_LABELS[m.stage]}
+            </span>
+            <span>
+              {fmtTime(m.kickoff)} · {m.city}
+            </span>
+          </div>
+          <p className="py-2 text-center text-[14px] font-medium text-ink-2">
+            {m.homePlaceholder || "Paarung"} – Teams werden nach der Gruppenphase
+            ermittelt
+          </p>
+        </div>
+      );
+    }
+    const tip = m.tips[0];
+    const card: TipCardMatch = {
+      id: m.id,
+      kickoffIso: m.kickoff.toISOString(),
+      time: fmtTime(m.kickoff),
+      city: m.city,
+      badge:
+        m.stage === "GROUP" ? `Gruppe ${m.groupLetter}` : STAGE_LABELS[m.stage],
+      homeName: m.homeTeam.name,
+      homeFlag: m.homeTeam.flag,
+      awayName: m.awayTeam.name,
+      awayFlag: m.awayTeam.flag,
+      locked: isTipLocked(m.kickoff, now) || m.status !== "SCHEDULED",
+      homeScore: m.homeScore,
+      awayScore: m.awayScore,
+      live: liveScores.get(m.id) ?? null,
+      tipHome: tip?.homeGoals ?? null,
+      tipAway: tip?.awayGoals ?? null,
+      points: tip?.points ?? null,
+    };
+    return <TipCard key={m.id} match={card} />;
+  };
+
+  const renderSection = (
+    list: typeof weekMatches,
+    heading?: string
+  ) =>
+    groupByDay(list).map(([day, dayMatches], i) => (
+      <section key={`${heading ?? ""}-${day}`}>
+        {heading && i === 0 && (
+          <h2 className="mb-2 mt-1 px-1 text-[13px] font-bold uppercase tracking-wide text-ink-2">
+            {heading}
+          </h2>
+        )}
+        <h2 className="mb-2 px-1 text-[16px] font-bold">{day}</h2>
+        <div className="space-y-3">{dayMatches.map(renderMatch)}</div>
+      </section>
+    ));
 
   return (
     <main>
@@ -103,6 +166,9 @@ export default async function TippsPage({
             }`}
           >
             Woche {w}
+            {w === currentWeek && (
+              <span className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full bg-green align-middle" />
+            )}
           </Link>
         ))}
       </div>
@@ -125,79 +191,9 @@ export default async function TippsPage({
             In dieser Woche finden keine Spiele statt.
           </div>
         )}
-        {[...byDay.entries()].map(([day, dayMatches]) => (
-          <section key={day} id={day === todayLabel ? "heute" : undefined}>
-            <h2 className="mb-2 px-1 text-[16px] font-bold">
-              {day}
-              {day === todayLabel && (
-                <span className="ml-2 rounded-full bg-tint-soft px-2 py-0.5 text-[11px] font-bold text-tint">
-                  Heute
-                </span>
-              )}
-            </h2>
-            <div className="space-y-3">
-              {dayMatches.map((m) => {
-                if (!m.homeTeam || !m.awayTeam) {
-                  return (
-                    <div key={m.id} className="card p-4">
-                      <div className="mb-1 flex items-center justify-between text-[12px] text-ink-2">
-                        <span className="rounded-full bg-card-2 px-2 py-0.5 font-semibold">
-                          {STAGE_LABELS[m.stage]}
-                        </span>
-                        <span>
-                          {fmtTime(m.kickoff)} · {m.city}
-                        </span>
-                      </div>
-                      <p className="py-2 text-center text-[14px] font-medium text-ink-2">
-                        {m.homePlaceholder || "Paarung"} – Teams werden nach der
-                        Gruppenphase ermittelt
-                      </p>
-                    </div>
-                  );
-                }
-                const tip = m.tips[0];
-                const card: TipCardMatch = {
-                  id: m.id,
-                  kickoffIso: m.kickoff.toISOString(),
-                  time: fmtTime(m.kickoff),
-                  city: m.city,
-                  badge:
-                    m.stage === "GROUP"
-                      ? `Gruppe ${m.groupLetter}`
-                      : STAGE_LABELS[m.stage],
-                  homeName: m.homeTeam.name,
-                  homeFlag: m.homeTeam.flag,
-                  awayName: m.awayTeam.name,
-                  awayFlag: m.awayTeam.flag,
-                  locked: isTipLocked(m.kickoff, now) || m.status !== "SCHEDULED",
-                  homeScore: m.homeScore,
-                  awayScore: m.awayScore,
-                  live: liveScores.get(m.id) ?? null,
-                  tipHome: tip?.homeGoals ?? null,
-                  tipAway: tip?.awayGoals ?? null,
-                  points: tip?.points ?? null,
-                };
-                return <TipCard key={m.id} match={card} />;
-              })}
-            </div>
-          </section>
-        ))}
+        {renderSection(openMatches)}
+        {doneMatches.length > 0 && renderSection(doneMatches, "Beendet")}
       </div>
-
-      {todayLabel && byDay.has(todayLabel) && (
-        <ScrollToToday />
-      )}
     </main>
-  );
-}
-
-// Springt beim Laden der aktuellen Woche zum heutigen Tag
-function ScrollToToday() {
-  return (
-    <script
-      dangerouslySetInnerHTML={{
-        __html: `(function(){var el=document.getElementById('heute');if(el&&!location.hash&&el.getBoundingClientRect().top>window.innerHeight*0.7){el.scrollIntoView({block:'start'});window.scrollBy(0,-12);}})();`,
-      }}
-    />
   );
 }
