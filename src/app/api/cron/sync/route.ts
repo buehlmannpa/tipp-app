@@ -39,7 +39,21 @@ export async function GET(req: Request) {
             : null,
         };
       });
-      debug = { mismatches: diffs.filter((d) => d.off !== null && d.off !== 0) };
+      const mismatches = diffs.filter((d) => d.off !== null && d.off !== 0);
+      // Korrektur direkt anwenden (Diagnose + Fix in einem)
+      let fixed = 0;
+      if (url.searchParams.get("fix") === "1") {
+        for (const d of mismatches) {
+          if (d.api) {
+            await prisma.match.update({
+              where: { id: d.id },
+              data: { kickoff: new Date(d.api) },
+            });
+            fixed++;
+          }
+        }
+      }
+      debug = { mismatches, fixed, apiCount: api.length };
     } catch (e) {
       debug = { error: String(e) };
     }

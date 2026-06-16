@@ -19,8 +19,9 @@
   --glass-border: rgba(255, 255, 255, 0.55);
 }
 
+/* Systemvorgabe: dunkel, ausser der User erzwingt hell */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #000000;
     --card: #1c1c1e;
     --card-2: #2c2c2e;
@@ -38,6 +39,26 @@
     --glass: rgba(28, 28, 30, 0.6);
     --glass-border: rgba(255, 255, 255, 0.08);
   }
+}
+
+/* Vom User erzwungener Dunkelmodus (überschreibt Systemvorgabe) */
+:root[data-theme="dark"] {
+  --bg: #000000;
+  --card: #1c1c1e;
+  --card-2: #2c2c2e;
+  --text: #ffffff;
+  --text-2: #98989f;
+  --text-3: #8e8e93;
+  --separator: rgba(84, 84, 88, 0.5);
+  --tint: #0a84ff;
+  --tint-soft: rgba(10, 132, 255, 0.18);
+  --green: #30d158;
+  --orange: #ff9f0a;
+  --orange-deep: #ffb340;
+  --red: #ff453a;
+  --gold: #ffd60a;
+  --glass: rgba(28, 28, 30, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.08);
 }
 
 @theme inline {
