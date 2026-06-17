@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="de-CH">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tippspiel · Desktop Mockup</title>
+<style>
+  :root{
+    --bg:#F2F2F7;
+    --card:#FFFFFF;
+    --card-hover:#FBFBFD;
+    --text:#15151B;
+    --text-2:#8A8A92;
+    --text-3:#B4B4BC;
+    --line:#ECECF0;
+    --line-strong:#E2E2E8;
+
+    --brand:#F4B400;
+    --brand-deep:#E0A500;
+    --brand-soft:#FFF6D9;
+
+    --blue:#0A84FF;
+    --blue-soft:#E8F2FF;
+    --blue-press:#0066D6;
+
+    --green:#2BB257;
+    --green-soft:#E6F7ED;
+    --orange:#F39A0E;
+    --orange-soft:#FDF1DC;
+    --red:#FF3B30;
+
+    --radius:18px;
+    --radius-md:14px;
+    --radius-sm:10px;
+    --shadow:0 1px 2px rgba(20,20,35,.04), 0 6px 22px rgba(20,20,35,.05);
+    --shadow-soft:0 1px 2px rgba(20,20,35,.04);
+    --sidebar:264px;
+    --font:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  body{
+    font-family:var(--font);
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.45;
+  }
+
+  /* ============ App Shell ============ */
+  .app{display:flex;min-height:100vh}
+
+  /* Sidebar replaces the mobile bottom tab bar */
+  .sidebar{
+    width:var(--sidebar);
+    position:fixed;inset:0 auto 0 0;
+    background:var(--card);
+    border-right:1px solid var(--line);
+    display:flex;flex-direction:column;
+    padding:22px 16px;
+    z-index:20;
+  }
+  .brand{display:flex;align-items:center;gap:11px;padding:6px 8px 0}
+  .brand-mark{
+    width:42px;height:42px;border-radius:13px;
+    background:linear-gradient(150deg,#5B4BFF,#7C5BFF);
+    display:grid;place-items:center;font-size:22px;
+    box-shadow:0 4px 12px rgba(91,75,255,.28);
+  }
+  .brand-text strong{display:block;font-size:17px;letter-spacing:-.3px}
+  .brand-text span{font-size:11.5px;color:var(--text-3);font-weight:600;letter-spacing:.4px;text-transform:uppercase}
+
+  .nav{margin-top:26px;display:flex;flex-direction:column;gap:3px}
+  .nav-label{font-size:11px;font-weight:700;color:var(--text-3);letter-spacing:.6px;text-transform:uppercase;padding:0 10px 8px}
+  .nav-item{
+    display:flex;align-items:center;gap:13px;
+    padding:11px 12px;border-radius:12px;
+    color:var(--text-2);font-size:15px;font-weight:600;
+    cursor:pointer;border:none;background:none;width:100%;text-align:left;
+    transition:background .15s,color .15s;
+  }
+  .nav-item svg{width:21px;height:21px;flex:none;stroke-width:1.85}
+  .nav-item:hover{background:var(--bg);color:var(--text)}
+  .nav-item.active{background:var(--blue-soft);color:var(--blue)}
+
+  .sidebar-foot{margin-top:auto;padding-top:16px;border-top:1px solid var(--line)}
+  .profile-chip{
+    display:flex;align-items:center;gap:11px;width:100%;
+    padding:9px 10px;border-radius:13px;border:none;background:none;cursor:pointer;
+    transition:background .15s;text-align:left;
+  }
+  .profile-chip:hover{background:var(--bg)}
+  .profile-chip .av{width:38px;height:38px;font-size:19px}
+  .profile-chip .pc-name{font-size:14.5px;font-weight:700;display:flex;align-items:center;gap:6px}
+  .profile-chip .pc-sub{font-size:12px;color:var(--text-2);font-weight:500}
+  .tag-admin{font-size:10px;font-weight:800;color:var(--brand-deep);background:var(--brand-soft);padding:2px 7px;border-radius:20px;letter-spacing:.3px}
+
+  /* Main */
+  .main{margin-left:var(--sidebar);flex:1;min-width:0}
+  .topbar{
+    position:sticky;top:0;z-index:10;
+    background:rgba(242,242,247,.82);backdrop-filter:saturate(180%) blur(16px);
+    border-bottom:1px solid var(--line);
+    padding:20px 44px 18px;
+  }
+  .eyebrow{font-size:12px;font-weight:700;color:var(--text-3);letter-spacing:.7px;text-transform:uppercase}
+  .topbar h1{font-size:30px;letter-spacing:-.8px;margin-top:3px;display:flex;align-items:center;gap:10px}
+  .content{padding:30px 44px 70px;max-width:1240px}
+
+  /* ============ Generic components ============ */
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .panel{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px 24px}
+  .section-head{display:flex;align-items:baseline;justify-content:space-between;margin:0 2px 14px}
+  .section-head h2{font-size:20px;letter-spacing:-.4px}
+  .link{color:var(--blue);font-size:14.5px;font-weight:600;cursor:pointer;text-decoration:none}
+  .link:hover{color:var(--blue-press)}
+
+  .av{
+    border-radius:50%;display:grid;place-items:center;
+    font-weight:800;color:#fff;flex:none;
+    width:40px;height:40px;font-size:17px;
+  }
+
+  .pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:13px;font-weight:700}
+  .pill-green{background:var(--green-soft);color:var(--green)}
+  .pill-orange{background:var(--orange-soft);color:var(--orange)}
+  .pts-badge{min-width:34px;text-align:center;padding:4px 9px;border-radius:9px;font-size:13px;font-weight:800}
+  .pts-3{background:var(--green-soft);color:var(--green)}
+  .pts-1{background:var(--orange-soft);color:var(--orange)}
+
+  .grp-tag{font-size:12px;font-weight:700;color:var(--blue);background:var(--blue-soft);padding:3px 11px;border-radius:8px}
+  .flag{font-size:21px;line-height:1}
+
+  /* View switching */
+  .view{display:none;animation:fade .28s ease}
+  .view.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  /* ============ Home / Dashboard ============ */
+  .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:26px}
+  .stat{padding:20px 22px}
+  .stat .v{font-size:30px;font-weight:800;letter-spacing:-1px;line-height:1}
+  .stat .v.blue{color:var(--blue)} .stat .v.gold{color:var(--brand-deep)} .stat .v.green{color:var(--green)}
+  .stat .l{font-size:13.5px;color:var(--text-2);font-weight:600;margin-top:7px}
+
+  .dash{display:grid;grid-template-columns:1.7fr 1fr;gap:22px;align-items:start}
+  .stack{display:flex;flex-direction:column;gap:22px}
+
+  .match-row{display:flex;align-items:center;gap:14px;padding:15px 22px;border-top:1px solid var(--line);cursor:pointer;transition:background .14s}
+  .match-row:first-of-type{border-top:none}
+  .match-row:hover{background:var(--card-hover)}
+  .mr-time{font-size:12.5px;color:var(--text-2);font-weight:600;width:78px;line-height:1.3;flex:none}
+  .mr-fix{flex:1;display:flex;align-items:center;gap:9px;font-size:15.5px;font-weight:600;min-width:0}
+  .mr-fix .vs{color:var(--text-3);font-weight:500;margin:0 2px}
+  .mr-chev{color:var(--text-3);font-size:18px}
+
+  .res-row{display:flex;align-items:center;gap:12px;padding:14px 22px;border-top:1px solid var(--line)}
+  .res-row:first-of-type{border-top:none}
+  .res-row .rr-team{display:flex;align-items:center;gap:8px;font-size:15.5px;font-weight:600}
+  .res-row .rr-score{font-weight:800;font-variant-numeric:tabular-nums;margin:0 2px}
+  .res-row .spacer{flex:1}
+
+  .lead-mini{display:flex;align-items:center;gap:13px;padding:14px 22px;border-top:1px solid var(--line)}
+  .lead-mini:first-of-type{border-top:none}
+  .lm-rank{font-size:20px;width:26px;text-align:center;flex:none}
+  .lm-name{flex:1;font-weight:700;font-size:15px}
+  .lm-pts{font-weight:800;font-variant-numeric:tabular-nums}
+
+  /* ============ Tipps ============ */
+  .weeks{display:flex;gap:9px;margin-bottom:14px;flex-wrap:wrap}
+  .week{padding:9px 18px;border-radius:22px;background:var(--card);box-shadow:var(--shadow-soft);font-weight:700;font-size:14.5px;cursor:pointer;color:var(--text-2);border:1px solid transparent;transition:.14s;display:flex;align-items:center;gap:7px}
+  .week:hover{color:var(--text)}
+  .week.active{background:var(--blue);color:#fff;box-shadow:0 4px 14px rgba(10,132,255,.3)}
+  .week .dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
+  .tip-note{font-size:13.5px;color:var(--text-2);font-weight:500;margin:4px 2px 22px;display:flex;align-items:center;gap:7px}
+  .day-head{font-size:18px;font-weight:800;letter-spacing:-.3px;margin:28px 2px 14px}
+  .day-head:first-child{margin-top:0}
+  .day-sub{font-size:12px;font-weight:700;color:var(--text-3);letter-spacing:.6px;text-transform:uppercase;margin:34px 2px 10px}
+  .match-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:16px}
+
+  .tcard{padding:20px;cursor:pointer;transition:transform .14s,box-shadow .14s}
+  .tcard:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(20,20,35,.05),0 14px 34px rgba(20,20,35,.07)}
+  .tcard-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+  .tcard-meta{font-size:12.5px;color:var(--text-2);font-weight:600}
+  .tcard-body{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .team{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;min-width:0}
+  .team .flag{font-size:34px}
+  .team .tn{font-weight:700;font-size:14.5px;text-align:center}
+  .score-in{display:flex;align-items:center;gap:8px}
+  .sbox{
+    width:50px;height:50px;border:1.5px solid var(--line-strong);border-radius:13px;
+    font-size:24px;font-weight:800;text-align:center;background:#fff;color:var(--text);
+    font-family:var(--font);font-variant-numeric:tabular-nums;
+  }
+  .sbox:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
+  .colon{font-size:22px;font-weight:700;color:var(--text-3)}
+  .tcard-result{display:flex;flex-direction:column;align-items:center;gap:5px}
+  .tcard-result .rs{font-size:26px;font-weight:800;letter-spacing:-.5px}
+  .tcard-result .tt{font-size:12.5px;color:var(--text-2);font-weight:600}
+
+  /* ============ Rangliste ============ */
+  .filters{display:flex;gap:9px;margin-bottom:22px}
+  .filter{padding:9px 18px;border-radius:22px;background:var(--card);box-shadow:var(--shadow-soft);font-weight:700;font-size:14px;cursor:pointer;color:var(--text-2);transition:.14s}
+  .filter:hover{color:var(--text)}
+  .filter.active{background:var(--blue);color:#fff;box-shadow:0 4px 14px rgba(10,132,255,.3)}
+
+  .podium{display:grid;grid-template-columns:1fr 1.12fr 1fr;gap:16px;align-items:end;margin-bottom:24px}
+  .pod{padding:22px 18px;text-align:center;position:relative}
+  .pod.gold{border:1.5px solid var(--brand);background:linear-gradient(180deg,#FFFCF2,#fff)}
+  .pod .medal{font-size:32px}
+  .pod .av{margin:10px auto 9px;width:54px;height:54px;font-size:24px}
+  .pod .pn{font-weight:800;font-size:16px}
+  .pod .pp{font-size:26px;font-weight:800;margin-top:5px;letter-spacing:-.5px}
+  .pod .pl{font-size:12px;color:var(--text-2);font-weight:600;margin-top:2px}
+
+  .table{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+  .thead{display:grid;grid-template-columns:64px 1fr 90px 90px 90px 90px;padding:14px 24px;border-bottom:1px solid var(--line);font-size:12px;font-weight:700;color:var(--text-3);letter-spacing:.5px;text-transform:uppercase}
+  .thead span:not(:nth-child(2)){text-align:center}
+  .trow{display:grid;grid-template-columns:64px 1fr 90px 90px 90px 90px;padding:14px 24px;border-top:1px solid var(--line);align-items:center;transition:background .14s}
+  .trow:hover{background:var(--card-hover)}
+  .trow.me{background:var(--blue-soft)}
+  .trow.me:hover{background:#dfeeff}
+  .tr-rank{font-size:19px;text-align:center;font-weight:700}
+  .tr-player{display:flex;align-items:center;gap:12px;font-weight:700;font-size:15.5px}
+  .tr-player .you{color:var(--blue);font-weight:700;font-size:13px}
+  .tr-num{text-align:center;font-variant-numeric:tabular-nums;color:var(--text-2);font-weight:600}
+  .tr-pts{text-align:center;font-weight:800;font-size:17px;font-variant-numeric:tabular-nums}
+  .legend{font-size:13px;color:var(--text-2);text-align:center;margin-top:18px;line-height:1.7}
+
+  /* ============ Gruppen ============ */
+  .grp-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:22px;align-items:start}
+  .grp-card{display:flex;align-items:center;gap:15px;padding:20px 22px;cursor:pointer;transition:transform .14s,box-shadow .14s}
+  .grp-card:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(20,20,35,.05),0 14px 34px rgba(20,20,35,.07)}
+  .grp-ico{width:50px;height:50px;border-radius:14px;background:var(--blue-soft);display:grid;place-items:center;color:var(--blue);flex:none}
+  .grp-ico svg{width:26px;height:26px;stroke-width:1.8}
+  .grp-info{flex:1}
+  .grp-info .gn{font-weight:800;font-size:17px}
+  .grp-info .gs{font-size:13.5px;color:var(--text-2);font-weight:500;margin-top:2px}
+  .form-card h3{font-size:16.5px;margin-bottom:14px}
+  .field{display:flex;gap:10px}
+  .field input{
+    flex:1;padding:13px 15px;border:1.5px solid var(--line-strong);border-radius:12px;
+    font-size:14.5px;font-family:var(--font);background:#fff;
+  }
+  .field input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
+  .field input.code{letter-spacing:2px;text-transform:uppercase}
+  .btn{padding:13px 22px;border-radius:12px;border:none;font-size:14.5px;font-weight:700;cursor:pointer;background:var(--blue);color:#fff;transition:.14s;white-space:nowrap}
+  .btn:hover{background:var(--blue-press)}
+  .btn-soft{background:#9DC9FF}
+  .btn-soft:hover{background:var(--blue)}
+
+  /* ============ Gruppendetails ============ */
+  .code-card{display:flex;align-items:center;justify-content:space-between;padding:22px 26px;margin-bottom:22px}
+  .code-card .cc-l span{font-size:13px;color:var(--text-2);font-weight:600;display:block;margin-bottom:6px}
+  .code-card .cc-code{font-size:30px;font-weight:800;letter-spacing:8px}
+  .leave{display:block;margin:26px auto 0;background:none;border:none;color:var(--red);font-weight:700;font-size:15px;cursor:pointer;padding:10px}
+  .leave:hover{text-decoration:underline}
+
+  /* ============ News ============ */
+  .news-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:20px}
+  .news-card{padding:22px 24px;transition:transform .14s,box-shadow .14s}
+  .news-card:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(20,20,35,.05),0 14px 34px rgba(20,20,35,.07)}
+  .news-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}
+  .news-date{font-size:12.5px;color:var(--text-3);font-weight:600}
+  .news-card h3{font-size:18px;letter-spacing:-.3px;line-height:1.3;margin-bottom:10px}
+  .news-card p{font-size:14px;color:var(--text-2);line-height:1.55}
+
+  /* ============ Profil / Einstellungen ============ */
+  .prof-grid{display:grid;grid-template-columns:1fr 1.25fr;gap:22px;align-items:start}
+  .prof-hero{display:flex;align-items:center;gap:18px;padding:26px;margin-bottom:22px}
+  .prof-hero .av{width:74px;height:74px;font-size:34px}
+  .prof-hero .ph-name{font-size:22px;font-weight:800;letter-spacing:-.4px}
+  .prof-hero .ph-mail{font-size:14px;color:var(--text-2);margin-top:3px}
+  .prof-hero .ph-hint{font-size:12.5px;color:var(--text-3);margin-top:8px}
+  .stat-list{overflow:hidden}
+  .stat-list .sl-row{display:flex;justify-content:space-between;align-items:center;padding:16px 24px;border-top:1px solid var(--line)}
+  .stat-list .sl-row:first-child{border-top:none}
+  .stat-list .sl-row .k{font-size:15.5px;font-weight:500}
+  .stat-list .sl-row .v{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums}
+
+  .set-block{padding:22px 24px;margin-bottom:18px}
+  .set-block .sb-title{font-size:16px;font-weight:800;display:flex;align-items:center;gap:9px;margin-bottom:16px}
+  .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;background:var(--bg);padding:6px;border-radius:14px}
+  .seg button{padding:14px;border:none;background:none;border-radius:10px;cursor:pointer;font-weight:700;font-size:14px;color:var(--text-2);display:flex;flex-direction:column;align-items:center;gap:6px;transition:.14s}
+  .seg button .ic{font-size:20px}
+  .seg button.on{background:var(--blue);color:#fff;box-shadow:0 4px 12px rgba(10,132,255,.3)}
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;gap:20px}
+  .toggle-row .tr-txt{font-size:13.5px;color:var(--text-2);max-width:80%}
+  .switch{width:50px;height:30px;border-radius:20px;background:#D8D8DE;position:relative;cursor:pointer;transition:.18s;flex:none}
+  .switch::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.18);transition:.18s}
+  .switch.on{background:var(--green)}
+  .switch.on::after{left:23px}
+  .nav-block{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;cursor:pointer;transition:background .14s}
+  .nav-block:hover{background:var(--card-hover)}
+  .nav-block .nb-l .nb-t{font-size:16px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .nav-block .nb-l .nb-s{font-size:13.5px;color:var(--text-2);margin-top:4px}
+  .nav-block .chev{color:var(--text-3);font-size:20px}
+
+  /* ============ Einzelner Tipp / Spiel ============ */
+  .match-hero{padding:30px;margin-bottom:24px}
+  .mh-date{text-align:center;font-size:14px;color:var(--text-2);font-weight:600;margin-bottom:20px}
+  .mh-grid{display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
+  .mh-team{text-align:center}
+  .mh-team .flag{font-size:54px}
+  .mh-team .n{font-size:18px;font-weight:800;margin-top:8px}
+  .mh-score{font-size:46px;font-weight:800;letter-spacing:-1.5px}
+  .tips-table{overflow:hidden}
+  .tips-row{display:flex;align-items:center;gap:14px;padding:15px 24px;border-top:1px solid var(--line)}
+  .tips-row:first-of-type{border-top:none}
+  .tips-row.me{background:var(--blue-soft)}
+  .tips-row .tp-name{flex:1;font-weight:700;font-size:15.5px;display:flex;align-items:center;gap:7px}
+  .tips-row .tp-tip{font-weight:800;font-size:17px;font-variant-numeric:tabular-nums}
+  .back{display:block;margin:24px auto 0;background:none;border:none;color:var(--blue);font-weight:600;font-size:15px;cursor:pointer;padding:8px}
+  .back:hover{color:var(--blue-press)}
+
+  @media(max-width:1080px){
+    .stat-row{grid-template-columns:repeat(2,1fr)}
+    .dash,.grp-grid,.prof-grid{grid-template-columns:1fr}
+    .content,.topbar{padding-left:28px;padding-right:28px}
+  }
+  @media(max-width:760px){
+    .sidebar{display:none}
+    .main{margin-left:0}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ SIDEBAR (ersetzt die mobile Tableiste) ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">🐤</div>
+      <div class="brand-text">
+        <strong>Tippspiel</strong>
+        <span>WM 2026</span>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-label">Menü</div>
+      <button class="nav-item active" data-view="home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9.6 12 3l9 6.6V20a1 1 0 0 1-1 1h-5v-6.2H9V21H4a1 1 0 0 1-1-1z"/></svg>
+        Home
+      </button>
+      <button class="nav-item" data-view="tipps">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7.2 15.4 9.7 14.1 13.8H9.9L8.6 9.7z"/></svg>
+        Tipps
+      </button>
+      <button class="nav-item" data-view="rangliste">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0zM7 6.5H4V8a3 3 0 0 0 3 3M17 6.5h3V8a3 3 0 0 1-3 3"/></svg>
+        Rangliste
+      </button>
+      <button class="nav-item" data-view="gruppen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 19v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1"/><circle cx="9.5" cy="8" r="3.4"/><path d="M21 19v-1a4 4 0 0 0-3-3.85M15.6 4.25a3.4 3.4 0 0 1 0 6.5"/></svg>
+        Gruppen
+      </button>
+      <button class="nav-item" data-view="news">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 5h12v14a1 1 0 0 0 1 1 3 3 0 0 0 3-3V8M4 5v14a1 1 0 0 0 1 1h12M7.5 9h5M7.5 13h5M7.5 16.5h3.5"/></svg>
+        News
+      </button>
+    </nav>
+
+    <div class="sidebar-foot">
+      <button class="profile-chip" data-view="profil">
+        <div class="av" style="background:#5B4BFF">🐤</div>
+        <div>
+          <div class="pc-name">pbu21 <span class="tag-admin">Admin</span></div>
+          <div class="pc-sub">Rang #1 · 16 Punkte</div>
+        </div>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+
+    <!-- ===== HOME ===== -->
+    <section class="view active" id="home">
+      <div class="topbar">
+        <div class="eyebrow">USA, Kanada &amp; Mexiko</div>
+        <h1>Hoi pbu21 <span>👋</span></h1>
+      </div>
+      <div class="content">
+        <div class="stat-row">
+          <div class="card stat"><div class="v blue">16</div><div class="l">Punkte</div></div>
+          <div class="card stat"><div class="v gold">#1</div><div class="l">Rang</div></div>
+          <div class="card stat"><div class="v green">3</div><div class="l">Exakte Tipps</div></div>
+          <div class="card stat"><div class="v">49</div><div class="l">Abgegebene Tipps</div></div>
+        </div>
+
+        <div class="dash">
+          <div class="stack">
+            <div>
+              <div class="section-head"><h2>Nächste Spiele</h2><a class="link" data-view="tipps">Alle →</a></div>
+              <div class="card">
+                <div class="match-row" data-view="spiel">
+                  <div class="mr-time">Mi., 17. Juni<br>19:00</div>
+                  <div class="mr-fix"><span class="flag">🇵🇹</span> Portugal <span class="vs">–</span> <span class="flag">🇨🇩</span> DR Kongo</div>
+                  <span class="pill pill-green">Tipp 3:0</span>
+                  <span class="mr-chev">›</span>
+                </div>
+                <div class="match-row" data-view="spiel">
+                  <div class="mr-time">Mi., 17. Juni<br>22:00</div>
+                  <div class="mr-fix"><span class="flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span> England <span class="vs">–</span> <span class="flag">🇭🇷</span> Kroatien</div>
+                  <span class="pill pill-green">Tipp 2:1</span>
+                  <span class="mr-chev">›</span>
+                </div>
+                <div class="match-row" data-view="spiel">
+                  <div class="mr-time">Do., 18. Juni<br>01:00</div>
+                  <div class="mr-fix"><span class="flag">🇬🇭</span> Ghana <span class="vs">–</span> <span class="flag">🇵🇦</span> Panama</div>
+                  <span class="pill pill-green">Tipp 0:0</span>
+                  <span class="mr-chev">›</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="section-head"><h2>Letzte Resultate</h2><a class="link" data-view="news">Alle →</a></div>
+              <div class="card">
+                <div class="res-row"><span class="flag">🇦🇹</span><span class="rr-team">Österreich</span><span class="rr-score">3:1</span><span class="rr-team">Jordanien <span class="flag">🇯🇴</span></span><span class="spacer"></span><span class="pts-badge pts-1">+1</span></div>
+                <div class="res-row"><span class="flag">🇦🇷</span><span class="rr-team">Argentinien</span><span class="rr-score">3:0</span><span class="rr-team">Algerien <span class="flag">🇩🇿</span></span><span class="spacer"></span><span class="pts-badge pts-3">+3</span></div>
+                <div class="res-row"><span class="flag">🇮🇶</span><span class="rr-team">Irak</span><span class="rr-score">1:4</span><span class="rr-team">Norwegen <span class="flag">🇳🇴</span></span><span class="spacer"></span><span class="pts-badge pts-1">+1</span></div>
+                <div class="res-row"><span class="flag">🇫🇷</span><span class="rr-team">Frankreich</span><span class="rr-score">3:1</span><span class="rr-team">Senegal <span class="flag">🇸🇳</span></span><span class="spacer"></span><span class="pts-badge pts-3">+3</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="section-head"><h2>Spitzenreiter</h2><a class="link" data-view="rangliste">Alle →</a></div>
+            <div class="card">
+              <div class="lead-mini"><span class="lm-rank">🥇</span><div class="av" style="background:#5B4BFF">🐤</div><span class="lm-name">pbu21</span><span class="lm-pts">16 P.</span></div>
+              <div class="lead-mini"><span class="lm-rank">🥈</span><div class="av" style="background:#2BB257">O</div><span class="lm-name">oil me up diddy</span><span class="lm-pts">14 P.</span></div>
+              <div class="lead-mini"><span class="lm-rank">🥉</span><div class="av" style="background:#F39A0E">🐫</div><span class="lm-name">fa.laess</span><span class="lm-pts">11 P.</span></div>
+            </div>
+            <p class="legend" style="text-align:left;margin-left:2px">49 Tipps abgegeben · Punktesystem: 3 exakt / 1 Tendenz</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== TIPPS ===== -->
+    <section class="view" id="tipps">
+      <div class="topbar">
+        <div class="eyebrow">Woche 1 · 11. Juni – 17. Juni</div>
+        <h1>Tipps</h1>
+      </div>
+      <div class="content">
+        <div class="weeks">
+          <div class="week active">Woche 1 <span class="dot"></span></div>
+          <div class="week">Woche 2</div>
+          <div class="week">Woche 3</div>
+          <div class="week">Woche 4</div>
+          <div class="week">Woche 5</div>
+        </div>
+        <div class="tip-note">🔒 Tippschluss ist jeweils 1 Stunde vor Anpfiff.</div>
+
+        <div class="day-head">Mittwoch, 17. Juni</div>
+        <div class="match-grid">
+          <div class="card tcard">
+            <div class="tcard-top"><span class="grp-tag">Gruppe K</span><span class="tcard-meta">19:00 · Houston</span></div>
+            <div class="tcard-body">
+              <div class="team"><span class="flag">🇵🇹</span><span class="tn">Portugal</span></div>
+              <div class="score-in"><input class="sbox" value="3" maxlength="2"><span class="colon">:</span><input class="sbox" value="0" maxlength="2"></div>
+              <div class="team"><span class="flag">🇨🇩</span><span class="tn">DR Kongo</span></div>
+            </div>
+          </div>
+          <div class="card tcard">
+            <div class="tcard-top"><span class="grp-tag">Gruppe L</span><span class="tcard-meta">22:00 · Dallas</span></div>
+            <div class="tcard-body">
+              <div class="team"><span class="flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><span class="tn">England</span></div>
+              <div class="score-in"><input class="sbox" value="2" maxlength="2"><span class="colon">:</span><input class="sbox" value="1" maxlength="2"></div>
+              <div class="team"><span class="flag">🇭🇷</span><span class="tn">Kroatien</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="day-head">Donnerstag, 18. Juni</div>
+        <div class="match-grid">
+          <div class="card tcard">
+            <div class="tcard-top"><span class="grp-tag">Gruppe L</span><span class="tcard-meta">01:00 · Toronto</span></div>
+            <div class="tcard-body">
+              <div class="team"><span class="flag">🇬🇭</span><span class="tn">Ghana</span></div>
+              <div class="score-in"><input class="sbox" value="0" maxlength="2"><span class="colon">:</span><input class="sbox" value="0" maxlength="2"></div>
+              <div class="team"><span class="flag">🇵🇦</span><span class="tn">Panama</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="day-sub">Beendet</div>
+        <div class="day-head" style="margin-top:0">Mittwoch, 17. Juni</div>
+        <div class="match-grid">
+          <div class="card tcard" data-view="spiel">
+            <div class="tcard-top"><span class="grp-tag">Gruppe J</span><span class="tcard-meta">06:00 · San Francisco ›</span></div>
+            <div class="tcard-body">
+              <div class="team"><span class="flag">🇦🇹</span><span class="tn">Österreich</span></div>
+              <div class="tcard-result"><span class="rs">3:1</span><span class="tt">Tipp 1:0</span><span class="pts-badge pts-1">+1 P.</span></div>
+              <div class="team"><span class="flag">🇯🇴</span><span class="tn">Jordanien</span></div>
+            </div>
+          </div>
+          <div class="card tcard">
+            <div class="tcard-top"><span class="grp-tag">Gruppe J</span><span class="tcard-meta">03:00 · Kansas City ›</span></div>
+            <div class="tcard-body">
+              <div class="team"><span class="flag">🇦🇷</span><span class="tn">Argentinien</span></div>
+              <div class="tcard-result"><span class="rs">3:0</span><span class="tt">Tipp 3:0</span><span class="pts-badge pts-3">+3 P.</span></div>
+              <div class="team"><span class="flag">🇩🇿</span><span class="tn">Algerien</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== RANGLISTE ===== -->
+    <section class="view" id="rangliste">
+      <div class="topbar">
+        <div class="eyebrow">Gesamtwertung</div>
+        <h1>Rangliste</h1>
+      </div>
+      <div class="content">
+        <div class="filters">
+          <div class="filter active">Alle Tipper</div>
+          <div class="filter">GameZigi</div>
+          <div class="filter">Post-IT</div>
+        </div>
+
+        <div class="podium">
+          <div class="card pod">
+            <div class="medal">🥈</div>
+            <div class="av" style="background:#2BB257">O</div>
+            <div class="pn">oil me up diddy</div>
+            <div class="pp">14</div><div class="pl">Punkte</div>
+          </div>
+          <div class="card pod gold">
+            <div class="medal">🥇</div>
+            <div class="av" style="background:#5B4BFF">🐤</div>
+            <div class="pn">pbu21</div>
+            <div class="pp">16</div><div class="pl">Punkte</div>
+          </div>
+          <div class="card pod">
+            <div class="medal">🥉</div>
+            <div class="av" style="background:#F39A0E">🐫</div>
+            <div class="pn">fa.laess</div>
+            <div class="pp">11</div><div class="pl">Punkte</div>
+          </div>
+        </div>
+
+        <div class="table">
+          <div class="thead"><span>Rang</span><span>Spieler</span><span>Exakt</span><span>Tendenz</span><span>Tipps</span><span>Punkte</span></div>
+          <div class="trow me">
+            <div class="tr-rank">🥇</div>
+            <div class="tr-player"><div class="av" style="background:#5B4BFF">🐤</div>pbu21 <span class="you">(du)</span></div>
+            <div class="tr-num">3</div><div class="tr-num">7</div><div class="tr-num">49</div><div class="tr-pts">16</div>
+          </div>
+          <div class="trow">
+            <div class="tr-rank">🥈</div>
+            <div class="tr-player"><div class="av" style="background:#2BB257">O</div>oil me up diddy</div>
+            <div class="tr-num">2</div><div class="tr-num">8</div><div class="tr-num">23</div><div class="tr-pts">14</div>
+          </div>
+          <div class="trow">
+            <div class="tr-rank">🥉</div>
+            <div class="tr-player"><div class="av" style="background:#F39A0E">🐫</div>fa.laess</div>
+            <div class="tr-num">1</div><div class="tr-num">8</div><div class="tr-num">23</div><div class="tr-pts">11</div>
+          </div>
+          <div class="trow">
+            <div class="tr-rank">🥉</div>
+            <div class="tr-player"><div class="av" style="background:#3F8EFC">🐴</div>Horseman47</div>
+            <div class="tr-num">1</div><div class="tr-num">8</div><div class="tr-num">22</div><div class="tr-pts">11</div>
+          </div>
+          <div class="trow">
+            <div class="tr-rank">🥉</div>
+            <div class="tr-player"><div class="av" style="background:#2E7BF6">🦄</div>Nic</div>
+            <div class="tr-num">1</div><div class="tr-num">8</div><div class="tr-num">26</div><div class="tr-pts">11</div>
+          </div>
+          <div class="trow">
+            <div class="tr-rank">6</div>
+            <div class="tr-player"><div class="av" style="background:#FF2D55">J</div>James</div>
+            <div class="tr-num">0</div><div class="tr-num">10</div><div class="tr-num">34</div><div class="tr-pts">10</div>
+          </div>
+          <div class="trow">
+            <div class="tr-rank">7</div>
+            <div class="tr-player"><div class="av" style="background:#2BB257">🦜</div>Visi</div>
+            <div class="tr-num">0</div><div class="tr-num">9</div><div class="tr-num">52</div><div class="tr-pts">9</div>
+          </div>
+          <div class="trow">
+            <div class="tr-rank">8</div>
+            <div class="tr-player"><div class="av" style="background:#3FB5C4">🐫</div>friedli11</div>
+            <div class="tr-num">0</div><div class="tr-num">6</div><div class="tr-num">22</div><div class="tr-pts">6</div>
+          </div>
+          <div class="trow">
+            <div class="tr-rank">9</div>
+            <div class="tr-player"><div class="av" style="background:#3FB5C4">A</div>aziiee</div>
+            <div class="tr-num">0</div><div class="tr-num">0</div><div class="tr-num">0</div><div class="tr-pts">0</div>
+          </div>
+        </div>
+        <p class="legend">Exaktes Resultat 3 Punkte · richtige Tendenz 1 Punkt.<br>Bei Punktgleichheit zählt die Anzahl exakter Tipps.</p>
+      </div>
+    </section>
+
+    <!-- ===== GRUPPEN ===== -->
+    <section class="view" id="gruppen">
+      <div class="topbar">
+        <div class="eyebrow">Deine Tipprunden</div>
+        <h1>Gruppen</h1>
+      </div>
+      <div class="content">
+        <div class="grp-grid">
+          <div class="stack">
+            <div class="card grp-card" data-view="gruppendetails">
+              <div class="grp-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 19v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1"/><circle cx="9.5" cy="8" r="3.4"/><path d="M21 19v-1a4 4 0 0 0-3-3.85"/></svg></div>
+              <div class="grp-info"><div class="gn">GameZigi</div><div class="gs">7 Mitglieder · von dir erstellt</div></div>
+              <span class="mr-chev">›</span>
+            </div>
+            <div class="card grp-card" data-view="gruppendetails">
+              <div class="grp-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 19v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1"/><circle cx="9.5" cy="8" r="3.4"/><path d="M21 19v-1a4 4 0 0 0-3-3.85"/></svg></div>
+              <div class="grp-info"><div class="gn">Post-IT</div><div class="gs">2 Mitglieder · von dir erstellt</div></div>
+              <span class="mr-chev">›</span>
+            </div>
+          </div>
+
+          <div class="stack">
+            <div class="panel form-card">
+              <h3>Neue Gruppe erstellen</h3>
+              <div class="field">
+                <input placeholder="Name, z. B. Büro Tipprunde">
+                <button class="btn btn-soft">Erstellen</button>
+              </div>
+            </div>
+            <div class="panel form-card">
+              <h3>Gruppe beitreten</h3>
+              <div class="field">
+                <input class="code" placeholder="EINLADUNGSCODE">
+                <button class="btn btn-soft">Beitreten</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== GRUPPENDETAILS ===== -->
+    <section class="view" id="gruppendetails">
+      <div class="topbar">
+        <div class="eyebrow">Tipprunde · 7 Mitglieder</div>
+        <h1>GameZigi</h1>
+      </div>
+      <div class="content">
+        <div class="card code-card">
+          <div class="cc-l">
+            <span>Einladungscode</span>
+            <div class="cc-code">ZDBPYX</div>
+          </div>
+          <button class="btn btn-soft">Teilen</button>
+        </div>
+
+        <div class="table">
+          <div class="thead"><span>Rang</span><span>Spieler</span><span>Exakt</span><span>Tendenz</span><span>Tipps</span><span>Punkte</span></div>
+          <div class="trow me">
+            <div class="tr-rank">🥇</div>
+            <div class="tr-player"><div class="av" style="background:#5B4BFF">🐤</div>pbu21 <span class="you">(du)</span></div>
+            <div class="tr-num">3</div><div class="tr-num">7</div><div class="tr-num">49</div><div class="tr-pts">16</div>
+          </div>
+          <div class="trow">
+            <div class="tr-rank">🥈</div>
+            <div class="tr-player"><div class="av" style="background:#2BB257">O</div>oil me up diddy</div>
+            <div class="tr-num">2</div><div class="tr-num">8</div><div class="tr-num">23</div><div class="tr-pts">14</div>
+          </div>
+          <div class="trow">
+            <div class="tr-rank">🥉</div>
+            <div class="tr-player"><div class="av" style="background:#3F8EFC">🐴</div>Horseman47</div>
+            <div class="tr-num">1</div><div class="tr-num">8</div><div class="tr-num">22</div><div class="tr-pts">11</div>
+          </div>
+          <div class="trow">
+            <div class="tr-rank">🥉</div>
+            <div class="tr-player"><div class="av" style="background:#2E7BF6">🦄</div>Nic</div>
+            <div class="tr-num">1</div><div class="tr-num">8</div><div class="tr-num">26</div><div class="tr-pts">11</div>
+          </div>
+          <div class="trow">
+            <div class="tr-rank">5</div>
+            <div class="tr-player"><div class="av" style="background:#FF2D55">J</div>James</div>
+            <div class="tr-num">0</div><div class="tr-num">10</div><div class="tr-num">34</div><div class="tr-pts">10</div>
+          </div>
+          <div class="trow">
+            <div class="tr-rank">6</div>
+            <div class="tr-player"><div class="av" style="background:#2BB257">🦜</div>Visi</div>
+            <div class="tr-num">0</div><div class="tr-num">9</div><div class="tr-num">52</div><div class="tr-pts">9</div>
+          </div>
+          <div class="trow">
+            <div class="tr-rank">7</div>
+            <div class="tr-player"><div class="av" style="background:#3FB5C4">🐫</div>friedli11</div>
+            <div class="tr-num">0</div><div class="tr-num">6</div><div class="tr-num">22</div><div class="tr-pts">6</div>
+          </div>
+        </div>
+        <button class="leave">Gruppe verlassen</button>
+      </div>
+    </section>
+
+    <!-- ===== NEWS ===== -->
+    <section class="view" id="news">
+      <div class="topbar">
+        <div class="eyebrow">Zusammenfassung der letzten Spiele</div>
+        <h1>News</h1>
+      </div>
+      <div class="content">
+        <div class="news-grid">
+          <div class="card news-card">
+            <div class="news-top"><span class="grp-tag">Gruppe J</span><span class="news-date">17. Juni</span></div>
+            <h3>🇦🇹 Österreich setzt sich mit 3:1 gegen Jordanien durch</h3>
+            <p>🇦🇹 Österreich 3:1 🇯🇴 Jordanien — Gruppenphase (Gruppe J) in San Francisco, Mittwoch, 17. Juni.</p>
+          </div>
+          <div class="card news-card">
+            <div class="news-top"><span class="grp-tag">Gruppe J</span><span class="news-date">17. Juni</span></div>
+            <h3>🇦🇷 Argentinien fegt Algerien mit 3:0 vom Platz</h3>
+            <p>🇦🇷 Argentinien 3:0 🇩🇿 Algerien — Gruppenphase (Gruppe J) in Kansas City, Mittwoch, 17. Juni.</p>
+          </div>
+          <div class="card news-card">
+            <div class="news-top"><span class="grp-tag">Gruppe I</span><span class="news-date">17. Juni</span></div>
+            <h3>🇳🇴 Norwegen fegt Irak mit 4:1 vom Platz</h3>
+            <p>🇮🇶 Irak 1:4 🇳🇴 Norwegen — Gruppenphase (Gruppe I) in Boston, Mittwoch, 17. Juni.</p>
+          </div>
+          <div class="card news-card">
+            <div class="news-top"><span class="grp-tag">Gruppe I</span><span class="news-date">16. Juni</span></div>
+            <h3>🇫🇷 Frankreich setzt sich mit 3:1 gegen Senegal durch</h3>
+            <p>🇫🇷 Frankreich 3:1 🇸🇳 Senegal — Gruppenphase (Gruppe I) in New York/NJ, Dienstag, 16. Juni.</p>
+          </div>
+          <div class="card news-card">
+            <div class="news-top"><span class="grp-tag">Gruppe G</span><span class="news-date">16. Juni</span></div>
+            <h3>Iran und Neuseeland trennen sich 2:2</h3>
+            <p>🇮🇷 Iran 2:2 🇳🇿 Neuseeland — Gruppenphase (Gruppe G) in Los Angeles, Dienstag, 16. Juni.</p>
+          </div>
+          <div class="card news-card">
+            <div class="news-top"><span class="grp-tag">Gruppe H</span><span class="news-date">16. Juni</span></div>
+            <h3>Saudi-Arabien und Uruguay trennen sich 1:1</h3>
+            <p>🇸🇦 Saudi-Arabien 1:1 🇺🇾 Uruguay — Gruppenphase (Gruppe H) in Miami, Dienstag, 16. Juni.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== PROFIL / EINSTELLUNGEN ===== -->
+    <section class="view" id="profil">
+      <div class="topbar">
+        <div class="eyebrow">Dein Account</div>
+        <h1>Profil</h1>
+      </div>
+      <div class="content">
+        <div class="prof-grid">
+          <div>
+            <div class="card prof-hero">
+              <div class="av" style="background:#5B4BFF">🐤</div>
+              <div>
+                <div class="ph-name">pbu21</div>
+                <div class="ph-mail">hockey.pat@hotmail.com</div>
+                <div class="ph-hint">Avatar anklicken für eine zufällige Figur</div>
+                <div style="margin-top:9px"><span class="tag-admin">Admin</span></div>
+              </div>
+            </div>
+            <div class="card stat-list">
+              <div class="sl-row"><span class="k">Rang</span><span class="v" style="color:var(--brand-deep)">#1</span></div>
+              <div class="sl-row"><span class="k">Punkte</span><span class="v">16</span></div>
+              <div class="sl-row"><span class="k">Exakte Tipps</span><span class="v">3</span></div>
+              <div class="sl-row"><span class="k">Abgegebene Tipps</span><span class="v">49</span></div>
+              <div class="sl-row"><span class="k">Gruppen</span><span class="v">2</span></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="card set-block">
+              <div class="sb-title">🎨 Darstellung</div>
+              <div class="seg">
+                <button data-theme><span class="ic">☀️</span>Hell</button>
+                <button data-theme><span class="ic">🌙</span>Dunkel</button>
+                <button class="on" data-theme><span class="ic">⚙️</span>System</button>
+              </div>
+            </div>
+
+            <div class="card set-block">
+              <div class="sb-title">🔔 Tipp-Erinnerungen</div>
+              <div class="toggle-row">
+                <div class="tr-txt">Erinnert dich auf diesem Gerät, bevor Spiele ohne Tipp starten.</div>
+                <div class="switch" id="reminderSwitch"></div>
+              </div>
+            </div>
+
+            <div class="card nav-block">
+              <div class="nb-l">
+                <div class="nb-t">⚙️ Verwaltung</div>
+                <div class="nb-s">Resultate, K.o.-Paarungen und Benutzer verwalten</div>
+              </div>
+              <span class="chev">›</span>
+            </div>
+
+            <div class="card nav-block" style="margin-top:18px">
+              <div class="nb-l">
+                <div class="nb-t">🔑 Passwort ändern</div>
+                <div class="nb-s">Aktualisiere dein Anmeldepasswort</div>
+              </div>
+              <span class="chev">›</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== EINZELNER TIPP / SPIEL ===== -->
+    <section class="view" id="spiel">
+      <div class="topbar">
+        <div class="eyebrow">Gruppe J · San Francisco</div>
+        <h1>Spiel</h1>
+      </div>
+      <div class="content" style="max-width:820px">
+        <div class="card match-hero">
+          <div class="mh-date">Mittwoch, 17. Juni · 06:00 Uhr</div>
+          <div class="mh-grid">
+            <div class="mh-team"><span class="flag">🇦🇹</span><div class="n">Österreich</div></div>
+            <div class="mh-score">3:1</div>
+            <div class="mh-team"><span class="flag">🇯🇴</span><div class="n">Jordanien</div></div>
+          </div>
+        </div>
+
+        <div class="section-head"><h2>Tipps deiner Gruppen</h2></div>
+        <div class="card tips-table">
+          <div class="tips-row"><div class="av" style="background:#2BB257">O</div><span class="tp-name">oil me up diddy</span><span class="tp-tip">3:1</span><span class="pts-badge pts-3">+3</span></div>
+          <div class="tips-row"><div class="av" style="background:#3F8EFC">🐴</div><span class="tp-name">Horseman47</span><span class="tp-tip">2:1</span><span class="pts-badge pts-1">+1</span></div>
+          <div class="tips-row"><div class="av" style="background:#FF2D55">J</div><span class="tp-name">James</span><span class="tp-tip">2:0</span><span class="pts-badge pts-1">+1</span></div>
+          <div class="tips-row"><div class="av" style="background:#2E7BF6">🦄</div><span class="tp-name">Nic</span><span class="tp-tip">2:0</span><span class="pts-badge pts-1">+1</span></div>
+          <div class="tips-row"><div class="av" style="background:#2BB257">🦜</div><span class="tp-name">Visi</span><span class="tp-tip">1:0</span><span class="pts-badge pts-1">+1</span></div>
+          <div class="tips-row"><div class="av" style="background:#F39A0E">🐫</div><span class="tp-name">fa.laess</span><span class="tp-tip">2:1</span><span class="pts-badge pts-1">+1</span></div>
+          <div class="tips-row"><div class="av" style="background:#3FB5C4">🐫</div><span class="tp-name">friedli11</span><span class="tp-tip">2:1</span><span class="pts-badge pts-1">+1</span></div>
+          <div class="tips-row me"><div class="av" style="background:#5B4BFF">🐤</div><span class="tp-name">pbu21 <span class="you" style="color:var(--blue);font-size:13px">(du)</span></span><span class="tp-tip">1:0</span><span class="pts-badge pts-1">+1</span></div>
+        </div>
+        <button class="back" data-view="tipps">‹ Zurück zu den Tipps</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  const views = document.querySelectorAll('.view');
+  const navItems = document.querySelectorAll('.nav-item');
+
+  function showView(id){
+    views.forEach(v => v.classList.toggle('active', v.id === id));
+    navItems.forEach(n => n.classList.toggle('active', n.dataset.view === id));
+    document.querySelector('.main').scrollTop = 0;
+    window.scrollTo({top:0});
+  }
+
+  // Any element with data-view navigates
+  document.querySelectorAll('[data-view]').forEach(el => {
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      showView(el.dataset.view);
+    });
+  });
+
+  // Week / filter pill toggling (visual only)
+  function groupToggle(selector){
+    document.querySelectorAll(selector).forEach(el => {
+      el.addEventListener('click', () => {
+        el.parentElement.querySelectorAll(selector).forEach(s => s.classList.remove('active'));
+        el.classList.add('active');
+      });
+    });
+  }
+  groupToggle('.week');
+  groupToggle('.filter');
+
+  // Theme segment
+  document.querySelectorAll('[data-theme]').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('[data-theme]').forEach(x => x.classList.remove('on'));
+      b.classList.add('on');
+    });
+  });
+
+  // Reminder switch
+  const sw = document.getElementById('reminderSwitch');
+  sw.addEventListener('click', () => sw.classList.toggle('on'));
+</script>
+</body>
+</html>
