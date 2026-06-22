@@ -61,26 +61,32 @@ export default async function Dashboard() {
 
   return (
     <main>
-      <header className="flex items-end justify-between px-5 pt-[max(env(safe-area-inset-top),20px)] pb-2">
+      <header className="flex items-end justify-between px-5 pt-[max(env(safe-area-inset-top),20px)] pb-2 md:px-0 md:pt-6 md:pb-5">
         <div>
-          <p className="text-[13px] font-medium uppercase tracking-wide text-ink-2">
+          <p className="text-[13px] font-medium uppercase tracking-wide text-ink-2 md:text-[12px]">
             WM 2026 · USA, Kanada & Mexiko
           </p>
-          <h1 className="text-[32px] font-bold tracking-tight">
+          <h1 className="text-[32px] font-bold tracking-tight md:mt-0.5 md:text-[30px]">
             Hoi {session.username} 👋
           </h1>
         </div>
-        <Link href="/profil" aria-label="Profil öffnen" className="mb-1">
+        <Link href="/profil" aria-label="Profil öffnen" className="mb-1 md:hidden">
           <Avatar name={session.username} emoji={myAvatar} size={40} />
         </Link>
       </header>
 
-      <div className="space-y-4 px-4">
+      <div className="space-y-4 px-4 md:space-y-6 md:px-0">
         {/* Statistik-Kacheln */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-3 md:grid-cols-4 md:gap-4">
           <Stat label="Punkte" value={me?.points ?? 0} accent="text-tint" />
           <Stat label="Rang" value={me ? `#${me.rank}` : "–"} accent="text-gold" />
           <Stat label="Exakt" value={me?.exact ?? 0} accent="text-green" />
+          <Stat
+            label="Abgegebene Tipps"
+            value={myTipCount}
+            accent=""
+            extraClass="hidden md:flex"
+          />
         </div>
 
         {openThisWeek > 0 && (
@@ -100,6 +106,9 @@ export default async function Dashboard() {
           </Link>
         )}
 
+        {/* Dashboard: ab md zweispaltig */}
+        <div className="space-y-4 md:grid md:grid-cols-[1.7fr_1fr] md:items-start md:gap-6 md:space-y-0">
+        <div className="space-y-4 md:space-y-6">
         {/* Nächste Spiele */}
         <section>
           <SectionTitle title="Nächste Spiele" href="/tipps" />
@@ -172,7 +181,10 @@ export default async function Dashboard() {
             </div>
           </section>
         )}
+        </div>
 
+        {/* Rechte Spalte: Spitzenreiter */}
+        <div className="space-y-4 md:space-y-6">
         {/* Top 3 */}
         <section>
           <SectionTitle title="Spitzenreiter" href="/rangliste" />
@@ -195,9 +207,11 @@ export default async function Dashboard() {
           </div>
         </section>
 
-        <p className="pb-2 pt-1 text-center text-[12px] text-ink-2">
+        <p className="pb-2 pt-1 text-center text-[12px] text-ink-2 md:px-1 md:text-left">
           {myTipCount} Tipps abgegeben · Punktesystem: 3 exakt / 1 Tendenz
         </p>
+        </div>
+        </div>
       </div>
     </main>
   );
@@ -207,15 +221,23 @@ function Stat({
   label,
   value,
   accent,
+  extraClass = "",
 }: {
   label: string;
   value: string | number;
   accent: string;
+  extraClass?: string;
 }) {
   return (
-    <div className="card flex flex-col items-center px-2 py-4">
-      <span className={`text-[24px] font-bold tabular-nums ${accent}`}>{value}</span>
-      <span className="text-[12px] font-medium text-ink-2">{label}</span>
+    <div
+      className={`card flex flex-col items-center px-2 py-4 md:py-5 ${extraClass}`}
+    >
+      <span className={`text-[24px] font-bold tabular-nums md:text-[30px] ${accent}`}>
+        {value}
+      </span>
+      <span className="mt-1 text-[12px] font-medium text-ink-2 md:text-[13px]">
+        {label}
+      </span>
     </div>
   );
 }

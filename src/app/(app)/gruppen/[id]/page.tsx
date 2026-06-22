@@ -35,7 +35,7 @@ export default async function GroupDetailPage({
         }`}
       />
 
-      <div className="space-y-4 px-4">
+      <div className="space-y-4 px-4 md:mx-auto md:max-w-[840px] md:px-0">
         <InviteCode code={group.inviteCode} groupName={group.name} />
         <LeaderboardList entries={entries} highlightUserId={session.userId} />
         <LeaveGroup groupId={group.id} />

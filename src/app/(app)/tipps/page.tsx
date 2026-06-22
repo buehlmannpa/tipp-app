@@ -146,8 +146,10 @@ export default async function TippsPage({
             {heading}
           </h2>
         )}
-        <h2 className="mb-2 px-1 text-[16px] font-bold">{day}</h2>
-        <div className="space-y-3">{dayMatches.map(renderMatch)}</div>
+        <h2 className="mb-2 px-1 text-[16px] font-bold md:text-[18px]">{day}</h2>
+        <div className="space-y-3 md:grid md:grid-cols-2 md:gap-4 md:space-y-0 xl:grid-cols-3">
+          {dayMatches.map(renderMatch)}
+        </div>
       </section>
     ));
 
@@ -156,7 +158,7 @@ export default async function TippsPage({
       <Header title="Tipps" subtitle={`Woche ${week} · ${weekRangeLabel(week)}`} />
 
       {/* Wochen-Auswahl */}
-      <div className="no-scrollbar mb-3 flex gap-2 overflow-x-auto px-4 pb-1">
+      <div className="no-scrollbar mb-3 flex gap-2 overflow-x-auto px-4 pb-1 md:px-0 md:flex-wrap md:overflow-visible">
         {WEEKS.map((w) => (
           <Link
             key={w}
@@ -174,18 +176,18 @@ export default async function TippsPage({
       </div>
 
       {openCount > 0 && (
-        <div className="mb-3 px-4">
+        <div className="mb-3 px-4 md:px-0">
           <span className="inline-block rounded-full bg-orange/15 px-3 py-1.5 text-[13px] font-bold text-orange-deep">
             Noch {openCount} {openCount === 1 ? "offener Tipp" : "offene Tipps"} in
             dieser Woche
           </span>
         </div>
       )}
-      <p className="mb-3 px-5 text-[12px] text-ink-2">
+      <p className="mb-3 px-5 text-[12px] text-ink-2 md:px-0">
         🔒 Tippschluss ist jeweils 1 Stunde vor Anpfiff.
       </p>
 
-      <div className="space-y-5 px-4">
+      <div className="space-y-5 px-4 md:px-0">
         {weekMatches.length === 0 && (
           <div className="card p-8 text-center text-[14px] text-ink-2">
             In dieser Woche finden keine Spiele statt.

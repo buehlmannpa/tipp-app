@@ -24,8 +24,9 @@ export default async function ProfilPage() {
     <main>
       <Header title="Profil" subtitle="Dein Account" />
 
-      <div className="space-y-4 px-4">
-        <div className="card flex items-center gap-4 p-4">
+      <div className="space-y-4 px-4 md:grid md:grid-cols-[1fr_1.25fr] md:items-start md:gap-6 md:space-y-0 md:px-0">
+        <div className="space-y-4">
+        <div className="card flex items-center gap-4 p-4 md:p-6">
           <AvatarPicker name={user.username} initialAvatar={user.avatar} />
           <div>
             <p className="text-[19px] font-bold">{user.username}</p>
@@ -48,7 +49,9 @@ export default async function ProfilPage() {
           <Row label="Abgegebene Tipps" value={`${me?.tipped ?? 0}`} />
           <Row label="Gruppen" value={`${groupCount}`} />
         </div>
+        </div>
 
+        <div className="space-y-4">
         <ThemeToggle />
 
         <PushToggle />
@@ -73,6 +76,7 @@ export default async function ProfilPage() {
         <InstallHint />
 
         <LogoutButton />
+        </div>
       </div>
     </main>
   );

@@ -20,13 +20,14 @@ export default async function NewsPage() {
     <main>
       <Header title="News" subtitle="Zusammenfassung der letzten Spiele" />
 
-      <div className="space-y-3 px-4">
+      <div className="space-y-3 px-4 md:space-y-6 md:px-0">
         {items.length === 0 && (
           <div className="card p-8 text-center text-[14px] text-ink-2">
             Sobald die ersten Spiele gespielt sind, findest du hier die
             Zusammenfassungen.
           </div>
         )}
+        <div className="space-y-3 md:grid md:grid-cols-2 md:gap-4 md:space-y-0 xl:grid-cols-3">
         {items.map((item) => {
           const inner = (
             <>
@@ -71,6 +72,7 @@ export default async function NewsPage() {
             </article>
           );
         })}
+        </div>
 
         {/* Externe Feeds streamen nach – blockieren das Seitenladen nicht */}
         <Suspense fallback={<FeedSkeleton />}>
@@ -87,9 +89,10 @@ async function FeedSection() {
 
   return (
     <>
-      <h2 className="px-1 pt-3 text-[20px] font-bold tracking-tight">
+      <h2 className="px-1 pt-3 text-[20px] font-bold tracking-tight md:pt-0">
         Highlights & Berichte
       </h2>
+      <div className="space-y-3 md:grid md:grid-cols-2 md:gap-4 md:space-y-0 xl:grid-cols-3">
       {articles.map((a) => (
         <a
           key={a.id}
@@ -135,6 +138,7 @@ async function FeedSection() {
           </div>
         </a>
       ))}
+      </div>
       <p className="px-2 pb-1 text-center text-[12px] text-ink-2">
         Artikel von kicker und Sportschau · öffnen sich im Browser
       </p>

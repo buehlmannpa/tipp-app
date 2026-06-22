@@ -15,7 +15,7 @@ export default function TabBar() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed inset-x-3 bottom-0 z-50 mb-[max(env(safe-area-inset-bottom),12px)]">
+    <nav className="fixed inset-x-3 bottom-0 z-50 mb-[max(env(safe-area-inset-bottom),12px)] md:hidden">
       <div className="glass mx-auto flex max-w-md items-center justify-between rounded-[28px] px-2 py-1.5">
         {tabs.map((tab) => {
           const active =

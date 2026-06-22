@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { leaderboard } from "@/lib/leaderboard";
 import Header from "@/components/Header";
 import LeaderboardList from "@/components/LeaderboardList";
+import LeaderboardTable from "@/components/LeaderboardTable";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +34,7 @@ export default async function RanglistePage({
         subtitle={selected ? selected.name : "Gesamtwertung"}
       />
 
-      <div className="no-scrollbar mb-4 flex gap-2 overflow-x-auto px-4 pb-1">
+      <div className="no-scrollbar mb-4 flex gap-2 overflow-x-auto px-4 pb-1 md:px-0">
         <Link
           href="/rangliste"
           className={`shrink-0 rounded-full px-4 py-2 text-[14px] font-semibold ${
@@ -55,8 +56,14 @@ export default async function RanglistePage({
         ))}
       </div>
 
-      <div className="px-4">
-        <LeaderboardList entries={entries} highlightUserId={session.userId} />
+      <div className="px-4 md:px-0">
+        {/* Mobile: Karten-Liste · Desktop: Podium + Tabelle */}
+        <div className="md:hidden">
+          <LeaderboardList entries={entries} highlightUserId={session.userId} />
+        </div>
+        <div className="hidden md:block">
+          <LeaderboardTable entries={entries} highlightUserId={session.userId} />
+        </div>
         <p className="px-2 pt-3 text-center text-[12px] text-ink-2">
           Exaktes Resultat 3 Punkte · richtige Tendenz 1 Punkt.
           <br />

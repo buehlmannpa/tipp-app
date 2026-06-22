@@ -34,7 +34,7 @@ export default async function AdminPage({
     <main>
       <Header title="Verwaltung" subtitle="Admin-Dashboard" />
 
-      <div className="no-scrollbar mb-4 flex gap-2 overflow-x-auto px-4 pb-1">
+      <div className="no-scrollbar mb-4 flex gap-2 overflow-x-auto px-4 pb-1 md:flex-wrap md:overflow-visible md:px-0">
         {filters.map((f) => (
           <Link
             key={f.key}
@@ -98,8 +98,8 @@ async function Overview({ now }: { now: Date }) {
   ]);
 
   return (
-    <div className="space-y-4 px-4">
-      <div className="grid grid-cols-2 gap-3">
+    <div className="space-y-4 px-4 md:space-y-6 md:px-0">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6 md:gap-4">
         <StatCard label="Benutzer" value={userCount} accent="text-tint" />
         <StatCard label="Gruppen" value={groupCount} accent="text-tint" />
         <StatCard label="Tipps gesamt" value={tipCount} accent="text-green" />
@@ -192,7 +192,7 @@ async function Groups() {
   });
 
   return (
-    <div className="px-4">
+    <div className="px-4 md:px-0">
       <div className="card divide-y divide-sep overflow-hidden">
         {groups.length === 0 && (
           <p className="p-6 text-center text-[14px] text-ink-2">
@@ -227,7 +227,7 @@ async function Users() {
   });
 
   return (
-    <div className="px-4">
+    <div className="px-4 md:px-0">
       <div className="card divide-y divide-sep overflow-hidden">
         {users.map((u) => (
           <AdminUserRow
@@ -267,7 +267,7 @@ async function Matches({ filter, now }: { filter: string; now: Date }) {
   ]);
 
   return (
-    <div className="space-y-3 px-4">
+    <div className="space-y-3 px-4 md:grid md:grid-cols-2 md:gap-3 md:space-y-0 md:px-0">
       {matches.length === 0 && (
         <div className="card p-8 text-center text-[14px] text-ink-2">
           Nichts zu erfassen – alles aktuell. 👍

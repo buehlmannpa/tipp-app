@@ -73,7 +73,7 @@ export default async function SpielPage({
         } · ${match.city}`}
       />
 
-      <div className="space-y-4 px-4">
+      <div className="space-y-4 px-4 md:mx-auto md:max-w-[840px] md:px-0">
         {/* Spielkopf */}
         <div className="card p-5">
           <p className="mb-2 text-center text-[13px] text-ink-2">
