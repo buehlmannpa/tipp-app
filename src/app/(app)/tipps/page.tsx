@@ -9,17 +9,14 @@ import {
   fmtDay,
   fmtTime,
   STAGE_LABELS,
-  weekOf,
-  weekRangeLabel,
+  PHASES,
+  getPhase,
+  currentPhaseId,
 } from "@/lib/format";
 import Header from "@/components/Header";
 import TipCard, { type TipCardMatch } from "@/components/TipCard";
 
 export const dynamic = "force-dynamic";
-
-const WEEKS = [1, 2, 3, 4, 5, 6];
-const WEEK_START = Date.UTC(2026, 5, 11);
-const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 export default async function TippsPage({
   searchParams,
@@ -31,18 +28,21 @@ export default async function TippsPage({
   await maybeSendLockWarnings();
   const params = await searchParams;
   const now = new Date();
-  const currentWeek =
-    now.getTime() >= WEEK_START ? weekOf(now) : 1;
-  const week = Math.min(6, Math.max(1, Number(params.woche) || currentWeek));
+  const currentPhase = currentPhaseId(now);
+  const phaseId = Math.min(
+    8,
+    Math.max(1, Number(params.woche) || currentPhase)
+  );
+  const phase = getPhase(phaseId);
 
-  // Nur die Spiele der gewählten Woche laden
+  // Spiele der gewählten Phase: Gruppenphase per Datumsfenster, K.o. per Stage
   const weekMatches = await prisma.match.findMany({
-    where: {
-      kickoff: {
-        gte: new Date(WEEK_START + (week - 1) * WEEK_MS),
-        lt: week === 6 ? undefined : new Date(WEEK_START + week * WEEK_MS),
-      },
-    },
+    where: phase.group
+      ? {
+          stage: "GROUP",
+          kickoff: { gte: phase.group.start, lt: phase.group.end },
+        }
+      : { stage: { in: phase.stages } },
     include: {
       homeTeam: true,
       awayTeam: true,
@@ -155,20 +155,20 @@ export default async function TippsPage({
 
   return (
     <main>
-      <Header title="Tipps" subtitle={`Woche ${week} · ${weekRangeLabel(week)}`} />
+      <Header title="Tipps" subtitle={`${phase.label} · ${phase.range}`} />
 
-      {/* Wochen-Auswahl */}
+      {/* Phasen-Auswahl: Gruppenspieltage + K.o.-Runden */}
       <div className="no-scrollbar mb-3 flex gap-2 overflow-x-auto px-4 pb-1 md:px-0 md:flex-wrap md:overflow-visible">
-        {WEEKS.map((w) => (
+        {PHASES.map((p) => (
           <Link
-            key={w}
-            href={`/tipps?woche=${w}`}
+            key={p.id}
+            href={`/tipps?woche=${p.id}`}
             className={`shrink-0 rounded-full px-4 py-2.5 text-[14px] font-semibold transition-colors ${
-              w === week ? "bg-tint text-white" : "card text-ink-2"
+              p.id === phaseId ? "bg-tint text-white" : "card text-ink-2"
             }`}
           >
-            Woche {w}
-            {w === currentWeek && (
+            {p.tab}
+            {p.id === currentPhase && (
               <span className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full bg-green align-middle" />
             )}
           </Link>
@@ -179,7 +179,7 @@ export default async function TippsPage({
         <div className="mb-3 px-4 md:px-0">
           <span className="inline-block rounded-full bg-orange/15 px-3 py-1.5 text-[13px] font-bold text-orange-deep">
             Noch {openCount} {openCount === 1 ? "offener Tipp" : "offene Tipps"} in
-            dieser Woche
+            dieser Phase
           </span>
         </div>
       )}

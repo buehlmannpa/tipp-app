@@ -6,7 +6,7 @@ import { maybeSyncResults } from "@/lib/resultSync";
 import { getAvatar } from "@/lib/profile";
 import { maybeSendLockWarnings } from "@/lib/lockwarn";
 import { TIP_LOCK_MS } from "@/lib/scoring";
-import { currentWeek, fmtShort, fmtTime, weekBounds } from "@/lib/format";
+import { currentPhaseId, getPhase, fmtShort, fmtTime } from "@/lib/format";
 import Avatar from "@/components/Avatar";
 
 export const dynamic = "force-dynamic";
@@ -17,8 +17,16 @@ export default async function Dashboard() {
   await maybeSendLockWarnings();
   const now = new Date();
 
-  const week = currentWeek(now);
-  const { end: weekEnd } = weekBounds(week);
+  // Tippbare Spiele der aktuellen Phase (Gruppe per Datum, K.o. per Stage).
+  // Tippbar = Tippschluss (1 h vor Anpfiff) noch nicht erreicht.
+  const tipDeadlineCutoff = new Date(now.getTime() + TIP_LOCK_MS);
+  const phase = getPhase(currentPhaseId(now));
+  const openCountWhere = phase.group
+    ? {
+        stage: "GROUP" as const,
+        kickoff: { gte: phase.group.start, lt: phase.group.end, gt: tipDeadlineCutoff },
+      }
+    : { stage: { in: phase.stages }, kickoff: { gt: tipDeadlineCutoff } };
 
   const [entries, nextMatches, lastResults, myTipCount, openThisWeek, myAvatar] =
     await Promise.all([
@@ -46,9 +54,8 @@ export default async function Dashboard() {
       prisma.tip.count({ where: { userId: session.userId } }),
       prisma.match.count({
         where: {
+          ...openCountWhere,
           status: "SCHEDULED",
-          // tippbar = Tippschluss (1 h vor Anpfiff) noch nicht erreicht
-          kickoff: { gt: new Date(now.getTime() + TIP_LOCK_MS), lt: weekEnd },
           homeTeam: { isNot: null },
           tips: { none: { userId: session.userId } },
         },
@@ -97,8 +104,8 @@ export default async function Dashboard() {
             <div>
               <p className="text-[16px] font-bold text-white">
                 {openThisWeek === 1
-                  ? "1 offener Tipp diese Woche"
-                  : `${openThisWeek} offene Tipps diese Woche`}
+                  ? "1 offener Tipp"
+                  : `${openThisWeek} offene Tipps`}
               </p>
               <p className="text-[13px] text-white/80">Jetzt tippen, bevor’s losgeht</p>
             </div>
