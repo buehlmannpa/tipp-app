@@ -183,6 +183,61 @@ export async function syncResults(): Promise<{ updated: number }> {
 
   let updated = 0;
 
+  // K.o.-Platzhalter befüllen: pro Runde beide Listen (offene Slots und echte
+  // Spiele mit bekannten Teams) nach Anstoss sortieren und der Reihe nach 1:1
+  // paaren. Robust gegen abweichende Tagesverteilung – kein Slot bleibt leer,
+  // solange football-data gleich viele Spiele wie Slots liefert.
+  const KO_STAGES: Stage[] = [
+    "ROUND_32",
+    "ROUND_16",
+    "QUARTER",
+    "SEMI",
+    "THIRD",
+    "FINAL",
+  ];
+  for (const stage of KO_STAGES) {
+    const open = (openByStage.get(stage) ?? [])
+      .slice()
+      .sort((a, b) => a.kickoff.getTime() - b.kickoff.getTime());
+    if (open.length === 0) continue;
+
+    const apiForStage = apiMatches
+      .map((am) => ({
+        am,
+        home: norm(am.homeTeam?.tla),
+        away: norm(am.awayTeam?.tla),
+        t: new Date(am.utcDate).getTime(),
+      }))
+      .filter(
+        (x) =>
+          STAGE_MAP[x.am.stage] === stage &&
+          x.home &&
+          x.away &&
+          teamIds.has(x.home) &&
+          teamIds.has(x.away) &&
+          !byPair.has(`${x.home}-${x.away}`) &&
+          !byPair.has(`${x.away}-${x.home}`)
+      )
+      .sort((a, b) => a.t - b.t);
+
+    const n = Math.min(open.length, apiForStage.length);
+    for (let i = 0; i < n; i++) {
+      const slot = open[i];
+      const x = apiForStage[i];
+      const m = await prisma.match.update({
+        where: { id: slot.id },
+        data: {
+          homeTeamId: x.home,
+          awayTeamId: x.away,
+          kickoff: new Date(x.am.utcDate),
+        },
+      });
+      byPair.set(`${x.home}-${x.away}`, m);
+      updated++;
+    }
+  }
+
+  // Resultate und Anstosszeiten aktualisieren
   for (const am of apiMatches) {
     const stage = STAGE_MAP[am.stage];
     const home = norm(am.homeTeam?.tla);
@@ -190,38 +245,7 @@ export async function syncResults(): Promise<{ updated: number }> {
     if (!stage || !home || !away) continue;
     if (!teamIds.has(home) || !teamIds.has(away)) continue;
 
-    let match = byPair.get(`${home}-${away}`) ?? byPair.get(`${away}-${home}`);
-
-    // K.o.-Paarung einem Platzhalter zuordnen (gleiche Stage, nächstgelegener Anstoss)
-    if (!match) {
-      const apiKickoff = new Date(am.utcDate).getTime();
-      const candidates = openByStage.get(stage) ?? [];
-      let best: Match | undefined;
-      let bestDiff = 48 * 60 * 60 * 1000; // max. 48h Abweichung
-      for (const c of candidates) {
-        const diff = Math.abs(c.kickoff.getTime() - apiKickoff);
-        if (diff < bestDiff) {
-          best = c;
-          bestDiff = diff;
-        }
-      }
-      if (best) {
-        match = await prisma.match.update({
-          where: { id: best.id },
-          data: {
-            homeTeamId: home,
-            awayTeamId: away,
-            kickoff: new Date(am.utcDate),
-          },
-        });
-        openByStage.set(
-          stage,
-          candidates.filter((c) => c.id !== best.id)
-        );
-        byPair.set(`${home}-${away}`, match);
-        updated++;
-      }
-    }
+    const match = byPair.get(`${home}-${away}`) ?? byPair.get(`${away}-${home}`);
     if (!match) continue;
 
     // Anstosszeit selbstkorrigierend: football-data ist die Quelle der
